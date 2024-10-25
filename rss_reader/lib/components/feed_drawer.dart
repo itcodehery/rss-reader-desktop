@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:rss_dart/dart_rss.dart';
 import 'package:rss_reader/components/custom_list_tile.dart';
-import 'package:rss_reader/providers/feed_provider.dart';
+import 'package:rss_reader/helpers/database_helper.dart';
+import 'package:rss_reader/models/raw_feed.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/providers/saved_feeds_provider.dart';
 
-class FeedDrawer extends StatelessWidget {
+class FeedDrawer extends ConsumerStatefulWidget {
   const FeedDrawer({super.key});
 
+  @override
+  ConsumerState<FeedDrawer> createState() => _FeedDrawerState();
+}
+
+class _FeedDrawerState extends ConsumerState<FeedDrawer> {
   double getWidth(BuildContext context) {
     const double minSize = 200;
     final double width = MediaQuery.of(context).size.width * 0.2;
@@ -15,6 +22,8 @@ class FeedDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final feeds = ref.watch(savedFeedsProvider);
+
     return Container(
       height: double.infinity,
       width: getWidth(context),
@@ -40,15 +49,16 @@ class FeedDrawer extends StatelessWidget {
             subtitle: Text("Your Feeds"),
           ),
           const SizedBox(height: 12),
-          const CustomListTile(
-            title: "verge.com",
-          ),
-          const CustomListTile(
-            title: "techcrunch.com",
-          ),
-          const CustomListTile(
-            title: "wired.com",
-          ),
+          if (feeds.isNotEmpty)
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: feeds.length,
+              itemBuilder: (context, index) {
+                return CustomListTile(
+                  title: feeds[index].title,
+                );
+              },
+            ),
           const Spacer(),
           ElevatedButton(
               style: const ButtonStyle(
@@ -78,13 +88,17 @@ class FeedDrawer extends StatelessWidget {
   }
 }
 
-class TextBox extends StatelessWidget {
+class TextBox extends ConsumerWidget {
   const TextBox({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    TextEditingController titleController = TextEditingController();
+    TextEditingController urlController = TextEditingController();
+    final savedFeeds = ref.watch(savedFeedsProvider.notifier);
+
     return AlertDialog(
       titlePadding: const EdgeInsets.all(0),
       contentPadding: const EdgeInsets.all(2),
@@ -94,15 +108,39 @@ class TextBox extends StatelessWidget {
             color: Colors.orange[200]!,
             width: 2,
           )),
-      content: TextField(
-        decoration: const InputDecoration(
-          hintText: "Enter RSS Feed URL",
-          border: OutlineInputBorder(borderSide: BorderSide.none),
-        ),
-        onSubmitted: (value) {
-          Navigator.of(context).pop();
-        },
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            decoration: const InputDecoration(
+              hintText: "Enter Title",
+              border: OutlineInputBorder(borderSide: BorderSide.none),
+            ),
+            controller: titleController,
+          ),
+          TextField(
+            decoration: const InputDecoration(
+              hintText: "Enter RSS Feed URL",
+              border: OutlineInputBorder(borderSide: BorderSide.none),
+            ),
+            controller: urlController,
+          ),
+        ],
       ),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            RawFeed feed = RawFeed(
+              title: titleController.text,
+              link: urlController.text,
+            );
+            DatabaseHelper().saveFeed(feed);
+            savedFeeds.addFeed(feed);
+            Navigator.pop(context);
+          },
+          child: const Text("Save"),
+        ),
+      ],
     );
   }
 }
