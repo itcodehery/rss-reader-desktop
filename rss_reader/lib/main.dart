@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:rss_reader/components/feed_drawer.dart';
+import 'package:rss_reader/components/feed_home.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -29,6 +31,7 @@ class MyApp extends ConsumerWidget {
         scaffoldBackgroundColor: Colors.black,
         primarySwatch: Colors.deepOrange,
         useMaterial3: true,
+        textTheme: GoogleFonts.dmSansTextTheme(),
       ),
       home: const HomePage(),
     );
@@ -49,6 +52,7 @@ class _HomePageState extends State<HomePage> {
       body: Row(
         children: [
           FeedDrawer(),
+          FeedHome(),
         ],
       ),
     );

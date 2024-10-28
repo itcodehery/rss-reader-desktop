@@ -34,4 +34,8 @@ class DatabaseHelper {
 
     await db.insert('saved_feeds', feed.toJson());
   }
+
+  Future<void> deleteDB() async {
+    await deleteDatabase('saved_feeds.db');
+  }
 }

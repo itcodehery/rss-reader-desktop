@@ -3,7 +3,9 @@ import 'package:rss_reader/components/custom_list_tile.dart';
 import 'package:rss_reader/helpers/database_helper.dart';
 import 'package:rss_reader/models/raw_feed.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
+import 'package:rss_reader/providers/selected_feed_provider.dart';
 
 class FeedDrawer extends ConsumerStatefulWidget {
   const FeedDrawer({super.key});
@@ -56,6 +58,7 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
               itemBuilder: (context, index) {
                 return CustomListTile(
                   title: feeds[index].title,
+                  index: index,
                 );
               },
             ),
@@ -67,9 +70,6 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                 backgroundColor: WidgetStatePropertyAll(Colors.white10),
               ),
               onPressed: () {
-                // var res =
-                //     await fetchFeed("https://www.androidauthority.com/feed/");
-                // debugPrint(res.first.title);
                 showDialog(
                   context: context,
                   builder: (context) {
@@ -100,6 +100,7 @@ class TextBox extends ConsumerWidget {
     final savedFeeds = ref.watch(savedFeedsProvider.notifier);
 
     return AlertDialog(
+      backgroundColor: Colors.black,
       titlePadding: const EdgeInsets.all(0),
       contentPadding: const EdgeInsets.all(2),
       shape: RoundedRectangleBorder(
@@ -129,14 +130,24 @@ class TextBox extends ConsumerWidget {
       ),
       actions: [
         ElevatedButton(
-          onPressed: () {
-            RawFeed feed = RawFeed(
-              title: titleController.text,
-              link: urlController.text,
-            );
-            DatabaseHelper().saveFeed(feed);
-            savedFeeds.addFeed(feed);
-            Navigator.pop(context);
+          onPressed: () async {
+            RawFeed? feed;
+            await getFeedType(urlController.text).then((type) {
+              feed = RawFeed(
+                title: titleController.text,
+                link: urlController.text,
+                type: type,
+              );
+            });
+
+            if (feed != null) {
+              DatabaseHelper().saveFeed(feed!);
+              savedFeeds.addFeed(feed!);
+            }
+            if (context.mounted) {
+              // you learn something new everyday
+              Navigator.pop(context);
+            }
           },
           child: const Text("Save"),
         ),

@@ -1,35 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:rss_reader/providers/selected_feed_provider.dart';
 
-class FeedHome extends StatelessWidget {
+class FeedHome extends ConsumerWidget {
   const FeedHome({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // create a gridview depending on the width of the screen
-    return SizedBox(
-      width: double.infinity,
-      height: double.infinity,
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
-        ),
-        itemBuilder: (context, index) {
-          return Container(
-            color: Colors.grey[300],
-            child: Center(
-              child: Text(
-                'Feed $index',
-                style: const TextStyle(
-                  fontSize: 18,
-                ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedFeed = ref.watch(selectedFeedProvider);
+
+    return selectedFeed == null
+        ? const Center(
+            child: Text(
+              'Select a feed',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )
+        : Center(
+            child: Text(
+              selectedFeed.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
           );
-        },
-        itemCount: 9,
-      ),
-    );
   }
 }
