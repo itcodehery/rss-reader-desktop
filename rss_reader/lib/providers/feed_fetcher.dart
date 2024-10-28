@@ -4,7 +4,7 @@ import 'package:xml/xml.dart';
 import 'package:rss_dart/domain/rss1_feed.dart';
 import 'package:rss_dart/domain/rss1_item.dart';
 
-enum FeedType { rss, atom, rss1 }
+enum FeedType { rss, atom, rss1, unknown }
 
 Future<List<dynamic>> fetchFeed(String url) async {
   try {
@@ -72,59 +72,5 @@ Future<FeedType> getFeedType(String url) async {
     }
   } catch (e) {
     throw Exception('Error fetching feed: $e');
-  }
-}
-
-// Function to fetch RSS feed
-Future<List<RssItem>> fetchRSSFeed(String url) async {
-  try {
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final feed = RssFeed.parse(response.body);
-      final List<RssItem> feedItems = feed.items;
-
-      return feedItems;
-    } else {
-      throw Exception('Failed to load RSS feed');
-    }
-  } catch (e) {
-    throw Exception('Error fetching RSS feed: $e');
-  }
-}
-
-// Function to fetch Atom feed
-Future<List<AtomItem>> fetchAtomFeed(String url) async {
-  try {
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final feed = AtomFeed.parse(response.body);
-      final List<AtomItem> feedItems = feed.items;
-
-      return feedItems;
-    } else {
-      throw Exception('Failed to load Atom feed');
-    }
-  } catch (e) {
-    throw Exception('Error fetching Atom feed: $e');
-  }
-}
-
-// Function to fetch RSS 1.0 feed
-Future<List<Rss1Item>> fetchRss1Feed(String url) async {
-  try {
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final feed = Rss1Feed.parse(response.body);
-      final List<Rss1Item> feedItems = feed.items;
-
-      return feedItems;
-    } else {
-      throw Exception('Failed to load RSS 1.0 feed');
-    }
-  } catch (e) {
-    throw Exception('Error fetching RSS 1.0 feed: $e');
   }
 }

@@ -1,4 +1,6 @@
+import 'package:rss_reader/helpers/database_helper.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:sqflite/sqflite.dart';
 
 class RawFeed {
   final String title;
@@ -15,7 +17,7 @@ class RawFeed {
     return RawFeed(
       title: json['title'],
       link: json['link'],
-      type: json['type'],
+      type: getFeedTypeFromString(json['type']),
     );
   }
 
@@ -23,7 +25,20 @@ class RawFeed {
     return {
       'title': title,
       'link': link,
-      'type': type,
+      'type': DatabaseHelper().getFeedTypeInString(type),
     };
+  }
+}
+
+FeedType getFeedTypeFromString(String type) {
+  switch (type) {
+    case 'RSS 2.0':
+      return FeedType.rss;
+    case 'Atom':
+      return FeedType.atom;
+    case 'RSS 1.0':
+      return FeedType.rss1;
+    default:
+      return FeedType.unknown;
   }
 }

@@ -5,7 +5,6 @@ import 'package:rss_reader/models/raw_feed.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
-import 'package:rss_reader/providers/selected_feed_provider.dart';
 
 class FeedDrawer extends ConsumerStatefulWidget {
   const FeedDrawer({super.key});
@@ -39,19 +38,23 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ListTile(
+            dense: true,
             contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              Icons.rss_feed_outlined,
+              size: 14,
+              color: Colors.white,
+            ),
             title: Text(
               'Drsstiny',
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
             subtitle: Text("Your Feeds"),
           ),
           const SizedBox(height: 12),
-          if (feeds.isNotEmpty)
+          if (feeds.isNotEmpty) ...[
             ListView.builder(
               shrinkWrap: true,
               itemCount: feeds.length,
@@ -62,7 +65,16 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                 );
               },
             ),
-          const Spacer(),
+            const Spacer(),
+          ] else
+            const Expanded(
+              child: Center(
+                child: Text(
+                  "No feeds added",
+                  style: TextStyle(color: Colors.white54),
+                ),
+              ),
+            ),
           ElevatedButton(
               style: const ButtonStyle(
                 // width max
@@ -98,38 +110,42 @@ class TextBox extends ConsumerWidget {
     TextEditingController titleController = TextEditingController();
     TextEditingController urlController = TextEditingController();
     final savedFeeds = ref.watch(savedFeedsProvider.notifier);
+    GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     return AlertDialog(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey.shade900,
       titlePadding: const EdgeInsets.all(0),
       contentPadding: const EdgeInsets.all(2),
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: Colors.orange[200]!,
-            width: 2,
-          )),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-              hintText: "Enter Title",
-              border: OutlineInputBorder(borderSide: BorderSide.none),
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: "Enter Title",
+                border: OutlineInputBorder(borderSide: BorderSide.none),
+              ),
+              controller: titleController,
             ),
-            controller: titleController,
-          ),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: "Enter RSS Feed URL",
-              border: OutlineInputBorder(borderSide: BorderSide.none),
+            TextFormField(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: "Enter RSS Feed URL",
+                border: OutlineInputBorder(borderSide: BorderSide.none),
+              ),
+              controller: urlController,
             ),
-            controller: urlController,
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         ElevatedButton(
+          style: const ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(Colors.transparent),
+              foregroundColor: WidgetStatePropertyAll(Colors.white),
+              elevation: WidgetStatePropertyAll(0)),
           onPressed: () async {
             RawFeed? feed;
             await getFeedType(urlController.text).then((type) {

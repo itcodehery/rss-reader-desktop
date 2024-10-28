@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rss_reader/helpers/database_helper.dart';
 import 'package:rss_reader/models/raw_feed.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
   @override
@@ -21,8 +21,13 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
     state = [...state, feed];
   }
 
-  void removeFeed(RawFeed feed) {
-    state = state.where((element) => element.link != feed.link).toList();
+  void removeFeed(int index) {
+    DatabaseHelper().deleteFeed(index);
+    state.removeAt(index);
+  }
+
+  void removeAllFeeds() {
+    state = [];
   }
 }
 

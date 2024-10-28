@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/helpers/database_helper.dart';
+import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 
 class CustomListTile extends ConsumerWidget {
@@ -31,8 +33,38 @@ class CustomListTile extends ConsumerWidget {
         ),
       ),
       trailing: IconButton(
-        icon: const Icon(Icons.menu),
-        onPressed: () {},
+        icon: const Icon(
+          Icons.delete_outline,
+          size: 16,
+          color: Colors.white30,
+        ),
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Delete Feed'),
+                  content:
+                      const Text('Are you sure you want to delete this feed?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        ref.read(savedFeedsProvider.notifier).removeFeed(index);
+                        DatabaseHelper().deleteFeed(index);
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Yes'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('No'),
+                    ),
+                  ],
+                );
+              });
+        },
       ),
       onTap: () {
         ref.read(selectedFeedProvider.notifier).selectFeed(index);

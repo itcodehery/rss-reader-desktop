@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rss_reader/models/raw_feed.dart';
+import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
@@ -8,7 +9,7 @@ class DatabaseHelper {
     var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
       debugPrint("Creating database");
       return db.execute(
-        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT)',
+        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT)',
       );
     }, version: 1);
 
@@ -24,11 +25,22 @@ class DatabaseHelper {
     return savedFeeds;
   }
 
+  Future<void> deleteFeed(int index) async {
+    var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
+      debugPrint("Creating database");
+      return db.execute(
+        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT)',
+      );
+    }, version: 1);
+
+    await db.delete('saved_feeds', where: 'id = ?', whereArgs: [index]);
+  }
+
   Future<void> saveFeed(RawFeed feed) async {
     var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
       debugPrint("Creating database");
       return db.execute(
-        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT)',
+        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT)',
       );
     }, version: 1);
 
@@ -37,5 +49,18 @@ class DatabaseHelper {
 
   Future<void> deleteDB() async {
     await deleteDatabase('saved_feeds.db');
+  }
+
+  String getFeedTypeInString(FeedType type) {
+    switch (type) {
+      case FeedType.rss:
+        return 'RSS 2.0';
+      case FeedType.atom:
+        return 'Atom';
+      case FeedType.rss1:
+        return 'RSS 1.0';
+      default:
+        return 'Unknown';
+    }
   }
 }
