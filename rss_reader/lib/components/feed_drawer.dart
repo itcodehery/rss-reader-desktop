@@ -5,6 +5,7 @@ import 'package:rss_reader/models/raw_feed.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
+import 'package:rss_reader/providers/selected_feed_provider.dart';
 
 class FeedDrawer extends ConsumerStatefulWidget {
   const FeedDrawer({super.key});
@@ -28,7 +29,7 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
     return Container(
       height: double.infinity,
       width: getWidth(context),
-      margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(10),
       padding: const EdgeInsets.all(12),
       decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -37,21 +38,26 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
+          ListTile(
+            trailing: IconButton(
+                onPressed: () {
+                  ref.read(selectedFeedProvider.notifier);
+                },
+                icon: const Icon(Icons.refresh)),
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(
+            leading: const Icon(
               Icons.rss_feed_outlined,
               size: 14,
               color: Colors.white,
             ),
-            title: Text(
+            title: const Text(
               'Drsstiny',
               style: TextStyle(
                 color: Colors.white,
               ),
             ),
-            subtitle: Text("Your Feeds"),
+            subtitle: const Text("Your Feeds"),
           ),
           const SizedBox(height: 12),
           if (feeds.isNotEmpty) ...[

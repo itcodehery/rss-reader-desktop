@@ -1,14 +1,19 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rss_dart/dart_rss.dart';
+import 'package:rss_reader/providers/selected_feed_provider.dart';
 import 'package:xml/xml.dart';
 import 'package:rss_dart/domain/rss1_feed.dart';
-import 'package:rss_dart/domain/rss1_item.dart';
 
-enum FeedType { rss, atom, rss1, unknown }
+part 'feed_content_provider.g.dart';
 
-Future<FeedType> getFeedType(String url) async {
+@riverpod
+Future<List<dynamic>> fetchFeedContents(Ref ref) async {
+  final url = ref.watch(selectedFeedProvider);
   try {
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url!.link));
 
     if (response.statusCode == 200) {
       final document = XmlDocument.parse(response.body);
@@ -19,15 +24,21 @@ Future<FeedType> getFeedType(String url) async {
 
       if (rootName == 'rss' && rootElement.getAttribute('version') == '2.0') {
         // RSS 2.0 feed
-        return FeedType.rss;
+        final feed = RssFeed.parse(response.body);
+        debugPrint("Feed: ${feed.description}");
+
+        return feed.items;
       } else if (rootName == 'feed' &&
           rootElement.getAttribute('xmlns') == 'http://www.w3.org/2005/Atom') {
         // Atom feed
-        return FeedType.atom;
+        final feed = AtomFeed.parse(response.body);
+        debugPrint("Feed: ${feed.title}");
+        return feed.items;
       } else if (rootName == 'RDF' &&
           rootElement.getAttribute('xmlns') == 'http://purl.org/rss/1.0/') {
         // RSS 1.0 feed
-        return FeedType.rss1;
+        final feed = Rss1Feed.parse(response.body);
+        return feed.items;
       } else {
         throw Exception('Unknown feed type');
       }
