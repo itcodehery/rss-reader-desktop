@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/helpers/html_parser.dart';
 import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
@@ -78,7 +79,96 @@ class FeedContentViewer extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      // showBottomSheet(
+                      //     elevation: 3,
+                      //     sheetAnimationStyle: AnimationStyle(
+                      //       curve: Curves.easeInOut,
+                      //       duration: const Duration(milliseconds: 300),
+                      //     ),
+                      //     context: context,
+                      //     builder: (context) {
+                      //       return Container(
+                      //         color: Colors.black,
+                      //         padding: const EdgeInsets.all(20),
+                      //         child: Column(
+                      //           crossAxisAlignment: CrossAxisAlignment.start,
+                      //           children: [
+                      //             Text(
+                      //               item.title,
+                      //               style: const TextStyle(
+                      //                 color: Colors.white,
+                      //                 fontSize: 20,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(height: 10),
+                      //             Text(
+                      //               item.description,
+                      //               style: const TextStyle(
+                      //                 color: Colors.white54,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(height: 10),
+                      //             Text(
+                      //               parseHtmlToPlainText(item.content.value),
+                      //               style: const TextStyle(
+                      //                 color: Colors.white54,
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       );
+                      //     });
+                      // convert bottom sheet into a dialog
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              backgroundColor: Colors.black,
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Text(
+                                      item.title,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      item.description,
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Expanded(
+                                      child: Text(
+                                        parseHtmlToPlainText(
+                                            item.content.value),
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                    },
                     child: Column(
                       children: [
                         item.categories != null

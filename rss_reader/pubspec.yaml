@@ -46,6 +46,7 @@ dependencies:
   google_fonts: ^6.2.1
   build_runner: ^2.4.13
   riverpod_generator: ^2.6.2
+  html: ^0.15.4
 
 dev_dependencies:
   flutter_test:
