@@ -47,6 +47,7 @@ dependencies:
   build_runner: ^2.4.13
   riverpod_generator: ^2.6.2
   html: ^0.15.4
+  get_time_ago: ^2.0.0
 
 dev_dependencies:
   flutter_test:

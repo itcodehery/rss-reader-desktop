@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_time_ago/get_time_ago.dart';
 import 'package:rss_reader/helpers/html_parser.dart';
+import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
@@ -80,98 +82,12 @@ class FeedContentViewer extends ConsumerWidget {
                   ),
                   child: InkWell(
                     onTap: () {
-                      // showBottomSheet(
-                      //     elevation: 3,
-                      //     sheetAnimationStyle: AnimationStyle(
-                      //       curve: Curves.easeInOut,
-                      //       duration: const Duration(milliseconds: 300),
-                      //     ),
-                      //     context: context,
-                      //     builder: (context) {
-                      //       return Container(
-                      //         color: Colors.black,
-                      //         padding: const EdgeInsets.all(20),
-                      //         child: Column(
-                      //           crossAxisAlignment: CrossAxisAlignment.start,
-                      //           children: [
-                      //             Text(
-                      //               item.title,
-                      //               style: const TextStyle(
-                      //                 color: Colors.white,
-                      //                 fontSize: 20,
-                      //               ),
-                      //             ),
-                      //             const SizedBox(height: 10),
-                      //             Text(
-                      //               item.description,
-                      //               style: const TextStyle(
-                      //                 color: Colors.white54,
-                      //               ),
-                      //             ),
-                      //             const SizedBox(height: 10),
-                      //             Text(
-                      //               parseHtmlToPlainText(item.content.value),
-                      //               style: const TextStyle(
-                      //                 color: Colors.white54,
-                      //               ),
-                      //             ),
-                      //           ],
-                      //         ),
-                      //       );
-                      //     });
-                      // convert bottom sheet into a dialog
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return Dialog(
-                              backgroundColor: Colors.black,
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      icon: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      item.title,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      item.description,
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Expanded(
-                                      child: Text(
-                                        parseHtmlToPlainText(
-                                            item.content.value),
-                                        style: const TextStyle(
-                                          color: Colors.white54,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          });
+                      // open the feed article
+                      openFeedArticle(context, item, selectedFeed!.type);
                     },
                     child: Column(
                       children: [
-                        item.categories != null
+                        item.categories != null || item.categories.isNotEmpty
                             ? Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Row(
@@ -185,7 +101,8 @@ class FeedContentViewer extends ConsumerWidget {
                                       color: const WidgetStatePropertyAll(
                                           Colors.deepOrange),
                                       label: Text(
-                                        "${item.categories.first.value}",
+                                        toSentenceCase(
+                                            "${selectedFeed!.type == FeedType.rss ? item.categories.first.value : item.categories.first.term}"),
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           color: Colors.white,
@@ -200,8 +117,12 @@ class FeedContentViewer extends ConsumerWidget {
                         ListTile(
                           title: Text(item.title,
                               overflow: TextOverflow.ellipsis,
+                              maxLines: screenWidth > 900 ? 2 : 1,
                               style: const TextStyle(color: Colors.white)),
-                          subtitle: Text(item.description,
+                          subtitle: Text(
+                              selectedFeed!.type == FeedType.rss
+                                  ? item.description
+                                  : "",
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(color: Colors.white54)),
                         ),
@@ -236,5 +157,89 @@ class FeedContentViewer extends ConsumerWidget {
           ),
         ),
     };
+  }
+
+  Future<dynamic> openFeedArticle(BuildContext context, item, FeedType type) {
+    debugPrint(feedTypeToString(type));
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Colors.grey[900],
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    selectedFeed!.type == FeedType.rss ? item.description : "",
+                    style: const TextStyle(color: Colors.white54, fontSize: 24),
+                  ),
+                  const SizedBox(height: 10),
+                  item.categories.length == 0 || item.categories.isEmpty
+                      ? SizedBox(
+                          height: 60,
+                          child: ListView.builder(
+                            // chips for the categories
+                            scrollDirection: Axis.horizontal,
+                            itemCount: item.categories.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Chip(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  side: BorderSide.none,
+                                  backgroundColor: Colors.deepOrange,
+                                  label: Text(
+                                    toSentenceCase(
+                                        "${selectedFeed!.type == FeedType.rss ? item.categories[index].term : item.categories[index].value ?? ""}"),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : const SizedBox(),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 300,
+                    child: Text(
+                      parseHtmlToPlainText(
+                          "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

@@ -25,19 +25,23 @@ Future<List<dynamic>> fetchFeedContents(Ref ref) async {
       if (rootName == 'rss' && rootElement.getAttribute('version') == '2.0') {
         // RSS 2.0 feed
         final feed = RssFeed.parse(response.body);
-        debugPrint("Feed: ${feed.description}");
+        debugPrint(
+            "RssFeed: ${feed.description} , Feed type: ${url.type.toString()}");
 
         return feed.items;
       } else if (rootName == 'feed' &&
           rootElement.getAttribute('xmlns') == 'http://www.w3.org/2005/Atom') {
         // Atom feed
         final feed = AtomFeed.parse(response.body);
-        debugPrint("Feed: ${feed.title}");
+        debugPrint(
+            "AtomFeed: ${feed.title} , Feed type: ${url.type.toString()}");
         return feed.items;
       } else if (rootName == 'RDF' &&
           rootElement.getAttribute('xmlns') == 'http://purl.org/rss/1.0/') {
         // RSS 1.0 feed
         final feed = Rss1Feed.parse(response.body);
+        debugPrint(
+            "Rss1Feed: ${feed.description} , Feed type: ${url.type.toString()}");
         return feed.items;
       } else {
         throw Exception('Unknown feed type');

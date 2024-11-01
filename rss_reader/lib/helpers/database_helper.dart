@@ -33,7 +33,14 @@ class DatabaseHelper {
       );
     }, version: 1);
 
-    await db.delete('saved_feeds', where: 'id = ?', whereArgs: [index]);
+    try {
+      await db
+          .delete('saved_feeds', where: 'id = ?', whereArgs: [index]).then((v) {
+        debugPrint("Feed deleted");
+      });
+    } catch (e) {
+      debugPrint("Error deleting feed: $e");
+    }
   }
 
   Future<void> saveFeed(RawFeed feed) async {

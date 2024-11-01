@@ -49,8 +49,8 @@ class CustomListTile extends ConsumerWidget {
                   actions: [
                     TextButton(
                       onPressed: () {
+                        ref.read(selectedFeedProvider.notifier).deselectFeed();
                         ref.read(savedFeedsProvider.notifier).removeFeed(index);
-                        DatabaseHelper().deleteFeed(index);
                         Navigator.of(context).pop();
                       },
                       child: const Text('Yes'),

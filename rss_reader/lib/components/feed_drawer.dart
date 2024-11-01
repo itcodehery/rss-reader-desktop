@@ -133,6 +133,12 @@ class TextBox extends ConsumerWidget {
                 hintText: "Enter Title",
                 border: OutlineInputBorder(borderSide: BorderSide.none),
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please enter a title";
+                }
+                return null;
+              },
               controller: titleController,
             ),
             TextFormField(
@@ -142,6 +148,12 @@ class TextBox extends ConsumerWidget {
                 border: OutlineInputBorder(borderSide: BorderSide.none),
               ),
               controller: urlController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please enter a valid URL";
+                }
+                return null;
+              },
             ),
           ],
         ),
@@ -153,22 +165,24 @@ class TextBox extends ConsumerWidget {
               foregroundColor: WidgetStatePropertyAll(Colors.white),
               elevation: WidgetStatePropertyAll(0)),
           onPressed: () async {
-            RawFeed? feed;
-            await getFeedType(urlController.text).then((type) {
-              feed = RawFeed(
-                title: titleController.text,
-                link: urlController.text,
-                type: type,
-              );
-            });
+            if (formKey.currentState!.validate()) {
+              RawFeed? feed;
+              await getFeedType(urlController.text).then((type) {
+                feed = RawFeed(
+                  title: titleController.text,
+                  link: urlController.text,
+                  type: type,
+                );
+              });
 
-            if (feed != null) {
-              DatabaseHelper().saveFeed(feed!);
-              savedFeeds.addFeed(feed!);
-            }
-            if (context.mounted) {
-              // you learn something new everyday
-              Navigator.pop(context);
+              if (feed != null) {
+                DatabaseHelper().saveFeed(feed!);
+                savedFeeds.addFeed(feed!);
+              }
+              if (context.mounted) {
+                // you learn something new everyday
+                Navigator.pop(context);
+              }
             }
           },
           child: const Text("Save"),

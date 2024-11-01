@@ -1,10 +1,21 @@
 import 'package:http/http.dart' as http;
-import 'package:rss_dart/dart_rss.dart';
+
 import 'package:xml/xml.dart';
-import 'package:rss_dart/domain/rss1_feed.dart';
-import 'package:rss_dart/domain/rss1_item.dart';
 
 enum FeedType { rss, atom, rss1, unknown }
+
+String feedTypeToString(FeedType feedType) {
+  switch (feedType) {
+    case FeedType.rss:
+      return 'RSS 2.0';
+    case FeedType.atom:
+      return 'Atom';
+    case FeedType.rss1:
+      return 'RSS 1.0';
+    case FeedType.unknown:
+      return 'Unknown';
+  }
+}
 
 Future<FeedType> getFeedType(String url) async {
   try {

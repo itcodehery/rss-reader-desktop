@@ -28,6 +28,11 @@ class RawFeed {
       'type': DatabaseHelper().getFeedTypeInString(type),
     };
   }
+
+  @override
+  String toString() {
+    return 'RawFeed {title: $title, link: $link, type: $type}';
+  }
 }
 
 FeedType getFeedTypeFromString(String type) {
