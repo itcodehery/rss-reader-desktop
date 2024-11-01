@@ -19,7 +19,7 @@ class _FeedHomeState extends ConsumerState<FeedHome> {
   @override
   Widget build(BuildContext context) {
     final selectedFeed = ref.watch(selectedFeedProvider);
-    return selectedFeed == null
+    return selectedFeed == null || selectedFeed.link.isEmpty
         ? const Expanded(
             child: Center(
               child: FittedBox(
@@ -120,9 +120,8 @@ class FeedContentViewer extends ConsumerWidget {
                               maxLines: screenWidth > 900 ? 2 : 1,
                               style: const TextStyle(color: Colors.white)),
                           subtitle: Text(
-                              selectedFeed!.type == FeedType.rss
-                                  ? item.description
-                                  : "",
+                              parseHtmlToPlainText(
+                                  "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(color: Colors.white54)),
                         ),
@@ -171,14 +170,25 @@ class FeedContentViewer extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Text(
+                        "Article",
+                        style: TextStyle(
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
                   ),
                   Text(
                     item.title,
@@ -190,10 +200,19 @@ class FeedContentViewer extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    selectedFeed!.type == FeedType.rss ? item.description : "",
-                    style: const TextStyle(color: Colors.white54, fontSize: 24),
+                    parseHtmlToPlainText(
+                        "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 24,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                   const SizedBox(height: 10),
+                  const Divider(
+                    color: Colors.white24,
+                  ),
                   item.categories.length == 0 || item.categories.isEmpty
                       ? SizedBox(
                           height: 60,

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:rss_reader/components/custom_list_tile.dart';
 import 'package:rss_reader/helpers/database_helper.dart';
+import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
+import 'package:toastification/toastification.dart';
 
 class FeedDrawer extends ConsumerStatefulWidget {
   const FeedDrawer({super.key});
@@ -42,6 +44,10 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
             trailing: IconButton(
                 onPressed: () {
                   ref.read(selectedFeedProvider.notifier);
+                  showToast("Refreshing feeds...", ToastificationType.info);
+                  // ref.read(savedFeedsProvider.notifier).removeAllFeeds();
+                  // DatabaseHelper().deleteDB();
+                  // showToast("All Feeds Deleted", ToastificationType.success);
                 },
                 icon: const Icon(Icons.refresh)),
             dense: true,

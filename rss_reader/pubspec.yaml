@@ -48,6 +48,8 @@ dependencies:
   riverpod_generator: ^2.6.2
   html: ^0.15.4
   get_time_ago: ^2.0.0
+  toastification: ^2.3.0
+  unused_import_remover: ^1.0.1
 
 dev_dependencies:
   flutter_test:

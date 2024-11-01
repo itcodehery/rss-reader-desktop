@@ -8,6 +8,7 @@ import 'package:rss_reader/components/feed_home.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,16 +25,18 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
-    return MaterialApp(
-      title: 'Drsstiny',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.black,
-        primarySwatch: Colors.deepOrange,
-        useMaterial3: true,
-        textTheme: GoogleFonts.dmSansTextTheme(),
+    return ToastificationWrapper(
+      child: MaterialApp(
+        title: 'Drsstiny',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          scaffoldBackgroundColor: Colors.black,
+          primarySwatch: Colors.deepOrange,
+          useMaterial3: true,
+          textTheme: GoogleFonts.dmSansTextTheme(),
+        ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
