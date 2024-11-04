@@ -163,7 +163,7 @@ class FeedContentViewer extends ConsumerWidget {
     return showDialog(
         context: context,
         builder: (context) {
-          return Dialog(
+          return Dialog.fullscreen(
             backgroundColor: Colors.grey[900],
             child: Container(
               padding: const EdgeInsets.all(20),
@@ -182,10 +182,18 @@ class FeedContentViewer extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
-                      const Text(
-                        "Article",
-                        style: TextStyle(
-                          color: Colors.white54,
+                      Chip(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        side: BorderSide.none,
+                        elevation: 0,
+                        backgroundColor: Colors.deepOrange,
+                        label: const Text(
+                          "Article",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -213,6 +221,10 @@ class FeedContentViewer extends ConsumerWidget {
                   const Divider(
                     color: Colors.white24,
                   ),
+                  IconButton(
+                      onPressed: () {},
+                      enableFeedback: true,
+                      icon: const Icon(Icons.share_outlined)),
                   item.categories.length == 0 || item.categories.isEmpty
                       ? SizedBox(
                           height: 60,
@@ -245,16 +257,21 @@ class FeedContentViewer extends ConsumerWidget {
                         )
                       : const SizedBox(),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    height: 300,
-                    child: Text(
-                      parseHtmlToPlainText(
-                          "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
-                      style: const TextStyle(
-                        color: Colors.white54,
+                  StatefulBuilder(builder: (context, setState) {
+                    return Expanded(
+                      child: SingleChildScrollView(
+                        child: SizedBox(
+                          child: Text(
+                            parseHtmlToPlainText(
+                                "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ),

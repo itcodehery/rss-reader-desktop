@@ -12,7 +12,7 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
   void fetchAllFeeds() async {
     // Fetch all feeds from the database
     await DatabaseHelper().getSavedFeeds().then((feeds) {
-      debugPrint("Fetched feeds: ${feeds.length} ${feeds.first.link}");
+      debugPrint("Fetched feeds: ${feeds.length}");
       state = feeds;
     });
   }
@@ -28,6 +28,11 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
 
   void removeAllFeeds() {
     state = [];
+  }
+
+  void updateFeedsUI() async {
+    var feed = await DatabaseHelper().getSavedFeeds();
+    state = feed;
   }
 }
 

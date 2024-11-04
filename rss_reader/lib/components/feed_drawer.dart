@@ -27,6 +27,7 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
   @override
   Widget build(BuildContext context) {
     final feeds = ref.watch(savedFeedsProvider);
+    // listen to the saved feeds provider
 
     return Container(
       height: double.infinity,
@@ -45,9 +46,6 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                 onPressed: () {
                   ref.read(selectedFeedProvider.notifier);
                   showToast("Refreshing feeds...", ToastificationType.info);
-                  // ref.read(savedFeedsProvider.notifier).removeAllFeeds();
-                  // DatabaseHelper().deleteDB();
-                  // showToast("All Feeds Deleted", ToastificationType.success);
                 },
                 icon: const Icon(Icons.refresh)),
             dense: true,

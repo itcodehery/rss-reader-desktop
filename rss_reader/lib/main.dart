@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rss_reader/components/feed_drawer.dart';
 import 'package:rss_reader/components/feed_home.dart';
+import 'package:rss_reader/pages/splash_page.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:toastification/toastification.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +18,11 @@ void main() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
+
+  await windowManager.ensureInitialized().then((_) {
+    windowManager.setMinimumSize(const Size(800, 600)); // set minimum size
+  });
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -35,7 +42,10 @@ class MyApp extends ConsumerWidget {
           useMaterial3: true,
           textTheme: GoogleFonts.dmSansTextTheme(),
         ),
-        home: const HomePage(),
+        home: const SplashPage(),
+        routes: {
+          '/home': (context) => const HomePage(),
+        },
       ),
     );
   }

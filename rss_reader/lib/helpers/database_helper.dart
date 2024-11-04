@@ -36,7 +36,7 @@ class DatabaseHelper {
     try {
       await db
           .delete('saved_feeds', where: 'id = ?', whereArgs: [index]).then((v) {
-        debugPrint("Feed deleted");
+        debugPrint("Feed deleted: $v");
       });
     } catch (e) {
       debugPrint("Error deleting feed: $e");

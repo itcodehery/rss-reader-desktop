@@ -50,6 +50,7 @@ dependencies:
   get_time_ago: ^2.0.0
   toastification: ^2.3.0
   unused_import_remover: ^1.0.1
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:
