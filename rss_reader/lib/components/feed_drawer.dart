@@ -25,10 +25,21 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final feeds = ref.watch(savedFeedsProvider);
     // listen to the saved feeds provider
 
+    const buttonStyle = ButtonStyle(
+      // width max
+      minimumSize: WidgetStatePropertyAll(Size.fromHeight(50)),
+      backgroundColor: WidgetStatePropertyAll(Colors.white10),
+    );
     return Container(
       height: double.infinity,
       width: getWidth(context),
@@ -86,11 +97,7 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
               ),
             ),
           ElevatedButton(
-              style: const ButtonStyle(
-                // width max
-                minimumSize: WidgetStatePropertyAll(Size.fromHeight(50)),
-                backgroundColor: WidgetStatePropertyAll(Colors.white10),
-              ),
+              style: buttonStyle,
               onPressed: () {
                 showDialog(
                   context: context,
@@ -104,6 +111,14 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                 style: TextStyle(
                     color: Colors.deepOrange, fontWeight: FontWeight.w500),
               )),
+          const SizedBox(height: 12),
+          ElevatedButton(
+              style: buttonStyle,
+              onPressed: () {
+                DatabaseHelper().deleteDB();
+              },
+              child: const Text("Remove All Feeds",
+                  style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -180,7 +195,6 @@ class TextBox extends ConsumerWidget {
               });
 
               if (feed != null) {
-                DatabaseHelper().saveFeed(feed!);
                 savedFeeds.addFeed(feed!);
               }
               if (context.mounted) {

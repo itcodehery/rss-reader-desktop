@@ -11,28 +11,33 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
 
   void fetchAllFeeds() async {
     // Fetch all feeds from the database
-    await DatabaseHelper().getSavedFeeds().then((feeds) {
-      debugPrint("Fetched feeds: ${feeds.length}");
-      state = feeds;
+    try {
+      await DatabaseHelper().getSavedFeeds().then((feeds) {
+        debugPrint("Fetched feeds: ${feeds.length}");
+        state = feeds;
+      });
+    } catch (e) {
+      debugPrint("Error fetching feeds: $e");
+    }
+  }
+
+  void addFeed(RawFeed feed) async {
+    await DatabaseHelper().saveFeed(feed).then((v) {
+      debugPrint("${feed.title} added! Feed saved! ");
+      state = [...state, feed];
     });
   }
 
-  void addFeed(RawFeed feed) {
-    state = [...state, feed];
-  }
-
-  void removeFeed(int index) {
-    DatabaseHelper().deleteFeed(index);
-    state.removeAt(index);
+  void removeFeed(int index) async {
+    debugPrint("No. of feeds before deletion in DB: ${state.length}");
+    await DatabaseHelper().deleteFeed(index).then((v) {
+      state.removeAt(index);
+    });
+    debugPrint("No. of feeds after deletion in DB: ${state.length}");
   }
 
   void removeAllFeeds() {
     state = [];
-  }
-
-  void updateFeedsUI() async {
-    var feed = await DatabaseHelper().getSavedFeeds();
-    state = feed;
   }
 }
 

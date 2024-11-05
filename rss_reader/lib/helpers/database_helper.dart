@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseHelper {
   Future<List<RawFeed>> getSavedFeeds() async {
     List<RawFeed> savedFeeds = [];
+
     var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
       debugPrint("Creating database");
       return db.execute(
@@ -26,12 +27,7 @@ class DatabaseHelper {
   }
 
   Future<void> deleteFeed(int index) async {
-    var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
-      debugPrint("Creating database");
-      return db.execute(
-        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT)',
-      );
-    }, version: 1);
+    var db = await openDatabase('saved_feeds.db', version: 1);
 
     try {
       await db

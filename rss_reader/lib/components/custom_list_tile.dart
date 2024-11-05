@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rss_reader/helpers/database_helper.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
@@ -65,7 +64,7 @@ class CustomListTile extends ConsumerWidget {
                       ref.read(selectedFeedProvider.notifier).deselectFeed();
                       ref.read(savedFeedsProvider.notifier).removeFeed(index);
                       Navigator.of(context).pop();
-                      ref.read(savedFeedsProvider.notifier).updateFeedsUI();
+                      // ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
                     },
                     child: const Text('Yes'),
                   ),
@@ -166,14 +165,14 @@ class CustomListTile extends ConsumerWidget {
                           onPressed: () {
                             ref
                                 .read(selectedFeedProvider.notifier)
-                                .deselectFeed();
+                                .deselectFeed(); // works correctly
                             ref
                                 .read(savedFeedsProvider.notifier)
-                                .removeFeed(index);
-                            Navigator.of(context).pop();
-                            ref
-                                .read(savedFeedsProvider.notifier)
-                                .updateFeedsUI();
+                                .removeFeed(index); // works correctly
+                            Navigator.of(context).pop(); // works correctly
+                            // ref
+                            //     .read(savedFeedsProvider.notifier)
+                            //     .fetchAllFeeds();
                           },
                           child: const Text('Yes'),
                         ),
