@@ -51,6 +51,7 @@ dependencies:
   toastification: ^2.3.0
   unused_import_remover: ^1.0.1
   window_manager: ^0.4.3
+  riverpod_lint: ^2.6.2
 
 dev_dependencies:
   flutter_test:

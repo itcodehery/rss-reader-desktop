@@ -27,7 +27,8 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
   @override
   void initState() {
     super.initState();
-    ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+    // ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+    // wrong place to call this function
   }
 
   @override
@@ -145,7 +146,28 @@ class TextBox extends ConsumerWidget {
         key: formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Add RSS Feed",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text("Enter the title and the RSS feed URL",
+                      style: TextStyle(color: Colors.white54)),
+                ],
+              ),
+            ),
             TextFormField(
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
@@ -201,6 +223,9 @@ class TextBox extends ConsumerWidget {
                 // you learn something new everyday
                 Navigator.pop(context);
               }
+              showToast("Adding ${titleController.text} Feed",
+                  ToastificationType.info);
+              ref.read(savedFeedsProvider.notifier).refresh();
             }
           },
           child: const Text("Save"),

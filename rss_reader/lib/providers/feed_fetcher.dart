@@ -1,4 +1,6 @@
 import 'package:http/http.dart' as http;
+import 'package:rss_reader/helpers/misc_functions.dart';
+import 'package:toastification/toastification.dart';
 
 import 'package:xml/xml.dart';
 
@@ -46,6 +48,8 @@ Future<FeedType> getFeedType(String url) async {
       throw Exception('Failed to load feed');
     }
   } catch (e) {
+    showToast(
+        "Error fetching feed! Please check the url!", ToastificationType.error);
     throw Exception('Error fetching feed: $e');
   }
 }

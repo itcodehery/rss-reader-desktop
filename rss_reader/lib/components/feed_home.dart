@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_time_ago/get_time_ago.dart';
 import 'package:rss_reader/helpers/html_parser.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
