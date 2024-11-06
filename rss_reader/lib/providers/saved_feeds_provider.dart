@@ -21,10 +21,6 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
     }
   }
 
-  void refresh() {
-    state = ref.refresh(savedFeedsProvider);
-  }
-
   void addFeed(RawFeed feed) async {
     await DatabaseHelper().saveFeed(feed).then((v) {
       debugPrint("${feed.title} added! Feed saved! ");
@@ -36,9 +32,10 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
     debugPrint("No. of feeds before deletion in DB: ${state.length}");
     await DatabaseHelper().deleteFeed(index).then((v) {
       state.removeAt(index);
+      ref.invalidateSelf();
+      fetchAllFeeds();
     });
     debugPrint("No. of feeds after deletion in DB: ${state.length}");
-    ref.invalidateSelf();
   }
 
   void removeAllFeeds() {

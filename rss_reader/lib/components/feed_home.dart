@@ -260,7 +260,7 @@ class FeedContentViewer extends ConsumerWidget {
                     return Expanded(
                       child: SingleChildScrollView(
                         child: SizedBox(
-                          child: Text(
+                          child: SelectableText(
                             parseHtmlToPlainText(
                                 "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
                             style: const TextStyle(

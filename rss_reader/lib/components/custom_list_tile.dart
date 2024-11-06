@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/providers/feed_fetcher.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
+import 'package:toastification/toastification.dart';
 
 class CustomListTile extends ConsumerWidget {
   const CustomListTile({super.key, required this.title, required this.index});
@@ -55,24 +57,31 @@ class CustomListTile extends ConsumerWidget {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: const Text('Delete Feed'),
-                content:
-                    const Text('Are you sure you want to delete this feed?'),
+                backgroundColor: Colors.grey.shade900,
+                title: const Text('Delete Feed',
+                    style: TextStyle(color: Colors.white)),
+                content: const Text(
+                    'Are you sure you want to delete this feed?',
+                    style: TextStyle(color: Colors.white)),
                 actions: [
                   TextButton(
                     onPressed: () {
                       ref.read(selectedFeedProvider.notifier).deselectFeed();
                       ref.read(savedFeedsProvider.notifier).removeFeed(index);
+                      showToast("Removing $title feed...",
+                          ToastificationType.warning);
                       Navigator.of(context).pop();
                       // ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
                     },
-                    child: const Text('Yes'),
+                    child: const Text('Yes',
+                        style: TextStyle(color: Colors.white)),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Text('No'),
+                    child:
+                        const Text('No', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               );
@@ -157,9 +166,12 @@ class CustomListTile extends ConsumerWidget {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('Delete Feed'),
+                      backgroundColor: Colors.grey.shade900,
+                      title: const Text('Delete Feed',
+                          style: TextStyle(color: Colors.white)),
                       content: const Text(
-                          'Are you sure you want to delete this feed?'),
+                          'Are you sure you want to delete this feed?',
+                          style: TextStyle(color: Colors.white)),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -170,17 +182,18 @@ class CustomListTile extends ConsumerWidget {
                                 .read(savedFeedsProvider.notifier)
                                 .removeFeed(index); // works correctly
                             Navigator.of(context).pop(); // works correctly
-                            // ref
-                            //     .read(savedFeedsProvider.notifier)
-                            //     .fetchAllFeeds();
+                            showToast("Removing $title feed...",
+                                ToastificationType.warning); // works correctly
                           },
-                          child: const Text('Yes'),
+                          child: const Text('Yes',
+                              style: TextStyle(color: Colors.white)),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: const Text('No'),
+                          child: const Text('No',
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     );

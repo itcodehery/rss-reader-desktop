@@ -56,7 +56,8 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
           ListTile(
             trailing: IconButton(
                 onPressed: () {
-                  ref.read(selectedFeedProvider.notifier);
+                  ref.invalidate(selectedFeedProvider);
+                  ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
                   showToast("Refreshing feeds...", ToastificationType.info);
                 },
                 icon: const Icon(Icons.refresh)),
@@ -74,6 +75,33 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
               ),
             ),
             subtitle: const Text("Your Feeds"),
+          ),
+          const SizedBox(height: 12),
+          // FOCUS : search bar
+          TextField(
+            focusNode: FocusNode(),
+            enabled: true,
+            onTap: () {
+              // unfocus
+              FocusScope.of(context).unfocus();
+              Navigator.pushNamed(context, '/search');
+            },
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.all(0),
+              filled: true,
+              hintText: "Search",
+              hintStyle: TextStyle(color: Colors.white54),
+              prefixIcon: Icon(
+                Icons.search,
+                size: 16,
+                color: Colors.white54,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+                borderSide: BorderSide.none,
+              ),
+              fillColor: Colors.white10,
+            ),
           ),
           const SizedBox(height: 12),
           if (feeds.isNotEmpty) ...[
@@ -112,14 +140,6 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                 style: TextStyle(
                     color: Colors.deepOrange, fontWeight: FontWeight.w500),
               )),
-          const SizedBox(height: 12),
-          ElevatedButton(
-              style: buttonStyle,
-              onPressed: () {
-                DatabaseHelper().deleteDB();
-              },
-              child: const Text("Remove All Feeds",
-                  style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -225,7 +245,6 @@ class TextBox extends ConsumerWidget {
               }
               showToast("Adding ${titleController.text} Feed",
                   ToastificationType.info);
-              ref.read(savedFeedsProvider.notifier).refresh();
             }
           },
           child: const Text("Save"),
