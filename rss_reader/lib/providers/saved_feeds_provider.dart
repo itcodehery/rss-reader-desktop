@@ -38,6 +38,14 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
     debugPrint("No. of feeds after deletion in DB: ${state.length}");
   }
 
+  List<RawFeed> searchFeeds(String query) {
+    return state
+        .where((feed) =>
+            feed.title.toLowerCase().contains(query.toLowerCase()) ||
+            feed.link.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
+
   void removeAllFeeds() {
     state = [];
   }

@@ -13,6 +13,11 @@ class SelectedFeedNotifier extends Notifier<RawFeed?> {
     state = feed[index];
   }
 
+  void selectFeedWithTitle(String title) {
+    final feed = ref.read(savedFeedsProvider);
+    state = feed.firstWhere((element) => element.title == title);
+  }
+
   void deselectFeed() {
     state = null;
   }
