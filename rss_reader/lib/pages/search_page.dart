@@ -67,6 +67,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                               style: const TextStyle(color: Colors.white)),
                           subtitle: Text(feeds[index].link,
                               style: const TextStyle(color: Colors.white54)),
+                          trailing: const Icon(
+                            Icons.rss_feed_outlined,
+                            color: Colors.white54,
+                          ),
                           onTap: () {
                             ref
                                 .read(selectedFeedProvider.notifier)

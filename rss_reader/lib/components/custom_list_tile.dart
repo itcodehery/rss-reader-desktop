@@ -89,6 +89,8 @@ class CustomListTile extends ConsumerWidget {
       },
       "Share Feed": () {},
     };
+
+    final selectedFeed = ref.watch(selectedFeedProvider);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       // right click to delete feed
@@ -135,74 +137,95 @@ class CustomListTile extends ConsumerWidget {
                 .toList(),
           );
         },
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const CircleAvatar(
-            radius: 10,
-            backgroundColor: Colors.deepOrange,
-            child: FittedBox(
-              child: Icon(
-                Icons.rss_feed,
-                size: 12,
-                color: Colors.white,
+        child: Card(
+          color: selectedFeed != null && selectedFeed.title == title
+              ? Colors.deepOrange.withOpacity(0.2)
+              : Colors.grey.shade900,
+          child: ListTile(
+            contentPadding: const EdgeInsets.only(left: 16, right: 16),
+            leading: const CircleAvatar(
+              radius: 10,
+              backgroundColor: Colors.deepOrange,
+              child: FittedBox(
+                child: Icon(
+                  Icons.rss_feed,
+                  size: 12,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
-          title: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white,
+            title: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          trailing: IconButton(
-            icon: const Icon(
-              Icons.delete_outline,
-              size: 16,
-              color: Colors.white30,
-            ),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      backgroundColor: Colors.grey.shade900,
-                      title: const Text('Delete Feed',
-                          style: TextStyle(color: Colors.white)),
-                      content: const Text(
-                          'Are you sure you want to delete this feed?',
-                          style: TextStyle(color: Colors.white)),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            ref
-                                .read(selectedFeedProvider.notifier)
-                                .deselectFeed(); // works correctly
-                            ref
-                                .read(savedFeedsProvider.notifier)
-                                .removeFeed(index); // works correctly
-                            Navigator.of(context).pop(); // works correctly
-                            showToast("Removing $title feed...",
-                                ToastificationType.warning); // works correctly
-                          },
-                          child: const Text('Yes',
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('No',
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    );
-                  });
+            trailing: selectedFeed != null && selectedFeed.title == title
+                ? IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      size: 16,
+                      color: Colors.white30,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              backgroundColor: Colors.grey.shade900,
+                              title: const Text('Delete Feed',
+                                  style: TextStyle(color: Colors.white)),
+                              content: const Text(
+                                  'Are you sure you want to delete this feed?',
+                                  style: TextStyle(color: Colors.white)),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    ref
+                                        .read(selectedFeedProvider.notifier)
+                                        .deselectFeed(); // works correctly
+                                    ref
+                                        .read(savedFeedsProvider.notifier)
+                                        .removeFeed(index); // works correctly
+                                    Navigator.of(context)
+                                        .pop(); // works correctly
+                                    showToast(
+                                        "Removing $title feed...",
+                                        ToastificationType
+                                            .warning); // works correctly
+                                  },
+                                  child: const Text('Yes',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('No',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                              ],
+                            );
+                          });
+                    },
+                  )
+                : IconButton(
+                    onPressed: () {
+                      ref.read(selectedFeedProvider.notifier).selectFeed(index);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.white30,
+                    ),
+                  ),
+            onTap: () {
+              ref.read(selectedFeedProvider.notifier).selectFeed(index);
             },
           ),
-          onTap: () {
-            ref.read(selectedFeedProvider.notifier).selectFeed(index);
-          },
         ),
       ),
     );

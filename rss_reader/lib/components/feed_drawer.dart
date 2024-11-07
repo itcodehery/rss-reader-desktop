@@ -105,17 +105,18 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
           ),
           const SizedBox(height: 12),
           if (feeds.isNotEmpty) ...[
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: feeds.length,
-              itemBuilder: (context, index) {
-                return CustomListTile(
-                  title: feeds[index].title,
-                  index: index,
-                );
-              },
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: feeds.length,
+                itemBuilder: (context, index) {
+                  return CustomListTile(
+                    title: feeds[index].title,
+                    index: index,
+                  );
+                },
+              ),
             ),
-            const Spacer(),
           ] else
             const Expanded(
               child: Center(
