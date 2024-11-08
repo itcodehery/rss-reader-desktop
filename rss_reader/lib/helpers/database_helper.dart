@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rss_reader/models/raw_feed.dart';
-import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
@@ -32,6 +32,19 @@ class DatabaseHelper {
     try {
       await db
           .delete('saved_feeds', where: 'id = ?', whereArgs: [index]).then((v) {
+        debugPrint("Feed deleted: $v");
+      });
+    } catch (e) {
+      debugPrint("Error deleting feed: $e");
+    }
+  }
+
+  Future<void> deleteFeedWithTitle(String title) async {
+    var db = await openDatabase('saved_feeds.db', version: 1);
+
+    try {
+      await db.delete('saved_feeds',
+          where: 'title = ?', whereArgs: [title]).then((v) {
         debugPrint("Feed deleted: $v");
       });
     } catch (e) {

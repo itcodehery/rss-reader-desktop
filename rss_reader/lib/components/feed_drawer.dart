@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rss_reader/components/custom_list_tile.dart';
-import 'package:rss_reader/helpers/database_helper.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 import 'package:toastification/toastification.dart';
@@ -57,7 +56,9 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
             trailing: IconButton(
                 onPressed: () {
                   ref.invalidate(selectedFeedProvider);
-                  ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+                  Future.delayed(const Duration(seconds: 1), () {
+                    ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+                  });
                   showToast("Refreshing feeds...", ToastificationType.info);
                 },
                 icon: const Icon(Icons.refresh)),

@@ -1,5 +1,5 @@
 import 'package:rss_reader/helpers/database_helper.dart';
-import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:sqflite/sqflite.dart';
 
 class RawFeed {

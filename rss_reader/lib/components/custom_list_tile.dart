@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
-import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 import 'package:toastification/toastification.dart';
@@ -189,7 +189,9 @@ class CustomListTile extends ConsumerWidget {
                                         .deselectFeed(); // works correctly
                                     ref
                                         .read(savedFeedsProvider.notifier)
-                                        .removeFeed(index); // works correctly
+                                        .removeFeedWithTitle(
+                                          selectedFeed.title,
+                                        ); // works correctly
                                     Navigator.of(context)
                                         .pop(); // works correctly
                                     showToast(

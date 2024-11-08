@@ -30,11 +30,21 @@ class SavedFeedsNotifer extends Notifier<List<RawFeed>> {
 
   void removeFeed(int index) async {
     debugPrint("No. of feeds before deletion in DB: ${state.length}");
-    await DatabaseHelper().deleteFeed(index).then((v) {
-      state.removeAt(index + 1);
-      ref.invalidateSelf();
-      fetchAllFeeds();
-    });
+    try {
+      await DatabaseHelper().deleteFeed(index);
+    } catch (e) {
+      debugPrint("Couldn't remove feed! ${e.toString()}");
+    }
+    debugPrint("No. of feeds after deletion in DB: ${state.length}");
+  }
+
+  void removeFeedWithTitle(String title) async {
+    debugPrint("No. of feeds before deletion in DB: ${state.length}");
+    try {
+      await DatabaseHelper().deleteFeedWithTitle(title);
+    } catch (e) {
+      debugPrint("Couldn't remove feed! ${e.toString()}");
+    }
     debugPrint("No. of feeds after deletion in DB: ${state.length}");
   }
 

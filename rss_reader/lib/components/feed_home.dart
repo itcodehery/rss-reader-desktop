@@ -6,7 +6,7 @@ import 'package:rss_reader/helpers/html_parser.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
-import 'package:rss_reader/providers/feed_fetcher.dart';
+import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 
 class FeedHome extends ConsumerStatefulWidget {
