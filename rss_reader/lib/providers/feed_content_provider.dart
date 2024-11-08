@@ -25,6 +25,7 @@ Future<List<dynamic>> fetchFeedContents(Ref ref) async {
       if (rootName == 'rss' && rootElement.getAttribute('version') == '2.0') {
         // RSS 2.0 feed
         final feed = RssFeed.parse(response.body);
+
         debugPrint(
             "RssFeed: ${feed.description} , Feed type: ${url.type.toString()}");
 

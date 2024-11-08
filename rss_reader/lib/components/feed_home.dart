@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/helpers/html_parser.dart';
@@ -74,63 +76,9 @@ class FeedContentViewer extends ConsumerWidget {
               itemCount: value.length,
               itemBuilder: (context, index) {
                 final item = value[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      // open the feed article
-                      openFeedArticle(context, item, selectedFeed!.type);
-                    },
-                    child: Column(
-                      children: [
-                        item.categories != null || item.categories.isNotEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    const Spacer(),
-                                    Chip(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      side: BorderSide.none,
-                                      color: const WidgetStatePropertyAll(
-                                          Colors.deepOrange),
-                                      label: Text(
-                                        toSentenceCase(
-                                            "${selectedFeed!.type == FeedType.rss ? item.categories.first.value : item.categories.first.term}"),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            : const SizedBox(),
-                        const Spacer(),
-                        ListTile(
-                          title: Text(item.title,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: screenWidth > 900 ? 2 : 1,
-                              style: const TextStyle(color: Colors.white)),
-                          subtitle: Text(
-                              parseHtmlToPlainText(
-                                  "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white54)),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                String imageUrl = '';
+
+                return feedContentBox(item, imageUrl, screenWidth);
               },
             ),
           ),
@@ -157,121 +105,204 @@ class FeedContentViewer extends ConsumerWidget {
     };
   }
 
-  Future<dynamic> openFeedArticle(BuildContext context, item, FeedType type) {
-    debugPrint(feedTypeToString(type));
+  StatefulBuilder feedContentBox(item, String imageUrl, double screenWidth) {
+    return StatefulBuilder(builder: (context, setState) {
+      fetchImageFromFeed(item.link).then((value) {
+        setState(() {
+          imageUrl = value;
+        });
+      });
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white10,
+          image: imageUrl.isNotEmpty
+              ? DecorationImage(
+                  image: NetworkImage(imageUrl),
+                  opacity: 0.5,
+                  fit: BoxFit.cover,
+                )
+              : null,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: InkWell(
+          onTap: () {
+            // open the feed article
+            openFeedArticle(context, item, selectedFeed!.type, imageUrl);
+          },
+          child: Column(
+            children: [
+              item.categories != null || item.categories.isNotEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          const Spacer(),
+                          Chip(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            side: BorderSide.none,
+                            color:
+                                const WidgetStatePropertyAll(Colors.deepOrange),
+                            label: Text(
+                              toSentenceCase(
+                                  "${selectedFeed!.type == FeedType.rss ? item.categories.first.value : item.categories.first.term}"),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  : const SizedBox(),
+              const Spacer(),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black,
+                      ]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  title: Text(item.title,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: screenWidth > 900 ? 2 : 1,
+                      style: const TextStyle(color: Colors.white)),
+                  subtitle: Text(
+                      parseHtmlToPlainText(
+                          "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: const TextStyle(color: Colors.white54)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<dynamic> openFeedArticle(
+      BuildContext context, item, FeedType type, String imageUrl) {
+    debugPrint("Open a ${feedTypeToString(type)} type feed...");
     return showDialog(
         context: context,
         builder: (context) {
           return Dialog.fullscreen(
-            backgroundColor: Colors.grey[900],
+            backgroundColor: Colors.transparent,
             child: Container(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // #1 : Close Button and Tag
+                    SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Expanded(
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const Spacer(),
+                            Chip(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              side: BorderSide.none,
+                              elevation: 0,
+                              backgroundColor: Colors.deepOrange,
+                              label: const Text(
+                                "Article",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Spacer(),
-                      Chip(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        side: BorderSide.none,
-                        elevation: 0,
-                        backgroundColor: Colors.deepOrange,
-                        label: const Text(
-                          "Article",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    parseHtmlToPlainText(
-                        "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 24,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 10),
-                  const Divider(
-                    color: Colors.white24,
-                  ),
-                  IconButton(
-                      onPressed: () {},
-                      enableFeedback: true,
-                      icon: const Icon(Icons.share_outlined)),
-                  item.categories.length == 0 || item.categories.isEmpty
-                      ? SizedBox(
-                          height: 60,
-                          child: ListView.builder(
-                            // chips for the categories
-                            scrollDirection: Axis.horizontal,
-                            itemCount: item.categories.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: Chip(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  side: BorderSide.none,
-                                  backgroundColor: Colors.deepOrange,
-                                  label: Text(
-                                    toSentenceCase(
-                                        "${selectedFeed!.type == FeedType.rss ? item.categories[index].term : item.categories[index].value ?? ""}"),
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                    const SizedBox(height: 10),
+                    // #2 : Title, Description and Image
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 480,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FittedBox(
+                                child: Container(
+                                  height: 270,
+                                  width: 480,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(imageUrl),
+                                      fit: BoxFit.cover,
                                     ),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                        )
-                      : const SizedBox(),
-                  const SizedBox(height: 10),
-                  StatefulBuilder(builder: (context, setState) {
-                    return Expanded(
-                      child: SingleChildScrollView(
-                        child: SizedBox(
-                          child: SelectableText(
-                            parseHtmlToPlainText(
-                                "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
-                            style: const TextStyle(
-                              color: Colors.white54,
-                            ),
+                              ),
+                              const SizedBox(height: 10),
+                              SelectableText(
+                                item.title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              SelectableText(
+                                parseHtmlToPlainText(
+                                    "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 24,
+                                ),
+                                maxLines: 5,
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    );
-                  }),
-                ],
+                        const SizedBox(width: 20),
+                        StatefulBuilder(builder: (context, setState) {
+                          return Expanded(
+                            child: SingleChildScrollView(
+                              child: SizedBox(
+                                child: SelectableText(
+                                  parseHtmlToPlainText(
+                                      "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
