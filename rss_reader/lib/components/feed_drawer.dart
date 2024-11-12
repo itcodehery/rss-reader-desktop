@@ -43,7 +43,7 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
     return Container(
       height: double.infinity,
       width: getWidth(context),
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(12),
       decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -133,7 +133,7 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    return const TextBox();
+                    return const TextBoxRSS();
                   },
                 );
               },
@@ -148,8 +148,8 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
   }
 }
 
-class TextBox extends ConsumerWidget {
-  const TextBox({
+class TextBoxRSS extends ConsumerWidget {
+  const TextBoxRSS({
     super.key,
   });
 

@@ -52,6 +52,8 @@ dependencies:
   unused_import_remover: ^1.0.1
   window_manager: ^0.4.3
   riverpod_lint: ^2.6.2
+  url_launcher_windows: ^3.1.3
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

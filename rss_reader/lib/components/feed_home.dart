@@ -8,6 +8,8 @@ import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
+import 'package:url_launcher_windows/url_launcher_windows.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 class FeedHome extends ConsumerStatefulWidget {
   const FeedHome({super.key});
@@ -192,6 +194,22 @@ class FeedContentViewer extends ConsumerWidget {
   Future<dynamic> openFeedArticle(
       BuildContext context, item, FeedType type, String imageUrl) {
     debugPrint("Open a ${feedTypeToString(type)} type feed...");
+    Future<void> launchInBrowser(String url) async {
+      if (await UrlLauncherPlatform.instance.canLaunch(url)) {
+        await UrlLauncherPlatform.instance.launch(
+          url,
+          useSafariVC: false,
+          useWebView: false,
+          enableJavaScript: false,
+          enableDomStorage: false,
+          universalLinksOnly: false,
+          headers: <String, String>{},
+        );
+      } else {
+        throw Exception('Could not launch $url');
+      }
+    }
+
     return showDialog(
         context: context,
         builder: (context) {
@@ -201,14 +219,13 @@ class FeedContentViewer extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // #1 : Close Button and Tag
-                    SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Expanded(
-                        child: Row(
+                child: Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // #1 : Close Button and Tag
+                        Row(
                           children: [
                             IconButton(
                               onPressed: () {
@@ -236,72 +253,105 @@ class FeedContentViewer extends ConsumerWidget {
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // #2 : Title, Description and Image
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 480,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FittedBox(
-                                child: Container(
-                                  height: 270,
-                                  width: 480,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage(imageUrl),
-                                      fit: BoxFit.cover,
+                        const SizedBox(height: 10),
+                        // #2 : Title, Description and Image
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 480,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  FittedBox(
+                                    child: Container(
+                                      height: 270,
+                                      width: 480,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: NetworkImage(imageUrl),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              SelectableText(
-                                item.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              SelectableText(
-                                parseHtmlToPlainText(
-                                    "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 24,
-                                ),
-                                maxLines: 5,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        StatefulBuilder(builder: (context, setState) {
-                          return Expanded(
-                            child: SingleChildScrollView(
-                              child: SizedBox(
-                                child: SelectableText(
-                                  parseHtmlToPlainText(
-                                      "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
-                                  style: const TextStyle(
-                                    color: Colors.white54,
+                                  const SizedBox(height: 10),
+                                  SelectableText(
+                                    item.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 10),
+                                  SelectableText(
+                                    parseHtmlToPlainText(
+                                        "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
+                                    style: const TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 24,
+                                    ),
+                                    maxLines: 5,
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        }),
+                            const SizedBox(width: 20),
+                            // #3 : Content
+                            StatefulBuilder(builder: (context, setState) {
+                              return Expanded(
+                                child: SizedBox(
+                                  child: SelectableText(
+                                    parseHtmlToPlainText(
+                                        "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                        // #4 : Read More Button
+                        Row(
+                          children: [
+                            const Spacer(),
+                            ElevatedButton(
+                              onPressed: () {
+                                launchInBrowser(item.link);
+                              },
+                              style: ButtonStyle(
+                                shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                backgroundColor: WidgetStateProperty.all(
+                                  Colors.deepOrange,
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Read More",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Icon(Icons.arrow_outward,
+                                      color: Colors.white, size: 16),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
