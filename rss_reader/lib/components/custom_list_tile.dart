@@ -68,10 +68,14 @@ class CustomListTile extends ConsumerWidget {
                     onPressed: () {
                       ref.read(selectedFeedProvider.notifier).deselectFeed();
                       ref.read(savedFeedsProvider.notifier).removeFeed(index);
+
                       showToast("Removing $title feed...",
                           ToastificationType.warning);
                       Navigator.of(context).pop();
-                      // ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+                      ref.invalidate(selectedFeedProvider);
+                      Future.delayed(const Duration(seconds: 1), () {
+                        ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
+                      });
                     },
                     child: const Text('Yes',
                         style: TextStyle(color: Colors.white)),
@@ -116,14 +120,6 @@ class CustomListTile extends ConsumerWidget {
               curve: Curves.easeInCubic,
               duration: const Duration(milliseconds: 500),
             ),
-            // items: feedOptions
-            //     .map((String option) => PopupMenuItem<String>(
-            //           value: option,
-            //           mouseCursor: SystemMouseCursors.click,
-            //           child: Text(option,
-            //               style: const TextStyle(color: Colors.white)),
-            //         ))
-            //     .toList(),
             items: feedOptions.entries
                 .map((MapEntry<String, Function> entry) => PopupMenuItem(
                       value: entry.key,
@@ -198,6 +194,13 @@ class CustomListTile extends ConsumerWidget {
                                         "Removing $title feed...",
                                         ToastificationType
                                             .warning); // works correctly
+                                    ref.invalidate(selectedFeedProvider);
+                                    Future.delayed(const Duration(seconds: 1),
+                                        () {
+                                      ref
+                                          .read(savedFeedsProvider.notifier)
+                                          .fetchAllFeeds();
+                                    });
                                   },
                                   child: const Text('Yes',
                                       style: TextStyle(color: Colors.white)),

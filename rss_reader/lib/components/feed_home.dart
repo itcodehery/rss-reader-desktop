@@ -8,7 +8,6 @@ import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
-import 'package:url_launcher_windows/url_launcher_windows.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 class FeedHome extends ConsumerStatefulWidget {
@@ -107,93 +106,151 @@ class FeedContentViewer extends ConsumerWidget {
     };
   }
 
-  StatefulBuilder feedContentBox(item, String imageUrl, double screenWidth) {
-    return StatefulBuilder(builder: (context, setState) {
-      fetchImageFromFeed(item.link).then((value) {
-        setState(() {
-          imageUrl = value;
-        });
-      });
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white10,
-          image: imageUrl.isNotEmpty
-              ? DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  opacity: 0.5,
-                  fit: BoxFit.cover,
-                )
-              : null,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: InkWell(
-          onTap: () {
-            // open the feed article
-            openFeedArticle(context, item, selectedFeed!.type, imageUrl);
-          },
-          child: Column(
-            children: [
-              item.categories != null || item.categories.isNotEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Spacer(),
-                          Chip(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
+  StatefulBuilder feedContentBox(
+      dynamic item, String imageUrl, double screenWidth) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        // Fetch the image if not already available
+        if (imageUrl.isEmpty) {
+          String? link = selectedFeed!.type == FeedType.rss
+              ? item.link
+              : selectedFeed!.type == FeedType.atom
+                  ? (item.links?.isNotEmpty == true
+                      ? item.links.first.href
+                      : null)
+                  : null;
+
+          if (link != null) {
+            fetchImageFromFeed(link).then((value) {
+              if (context.mounted) {
+                setState(() {
+                  imageUrl = value;
+                });
+              }
+            });
+          }
+        }
+
+        // Safely extract category
+        String? category = selectedFeed!.type == FeedType.rss
+            ? (item.categories != null && item.categories.isNotEmpty
+                ? item.categories.first.value
+                : null)
+            : selectedFeed!.type == FeedType.atom
+                ? (item.categories != null && item.categories.isNotEmpty
+                    ? item.categories.first.term
+                    : null)
+                : null;
+
+        // Extract description dynamically
+        String description = selectedFeed!.type == FeedType.rss
+            ? parseHtmlToPlainText(item.description ?? "")
+            : selectedFeed!.type == FeedType.atom
+                ? parseHtmlToPlainText(item.summary ?? "")
+                : "";
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white10,
+            image: imageUrl.isNotEmpty
+                ? DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    opacity: 0.5,
+                    fit: BoxFit.cover,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: InkWell(
+            onTap: () {
+              // Open the feed article
+              String? link = selectedFeed!.type == FeedType.rss
+                  ? item.link
+                  : selectedFeed!.type == FeedType.atom
+                      ? (item.links?.isNotEmpty == true
+                          ? item.links.first.href
+                          : null)
+                      : null;
+
+              if (link != null) {
+                openFeedArticle(context, item, selectedFeed!.type, imageUrl);
+              } else {
+                debugPrint("No link available for this feed item.");
+              }
+            },
+            child: Column(
+              children: [
+                // Display category if available
+                if (category != null && category.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const Spacer(),
+                        Chip(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          side: BorderSide.none,
+                          backgroundColor: Colors.deepOrange,
+                          label: Text(
+                            toSentenceCase(category),
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
                             ),
-                            side: BorderSide.none,
-                            color:
-                                const WidgetStatePropertyAll(Colors.deepOrange),
-                            label: Text(
-                              toSentenceCase(
-                                  "${selectedFeed!.type == FeedType.rss ? item.categories.first.value : item.categories.first.term}"),
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  : const SizedBox(),
-              const Spacer(),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                const Spacer(),
+                // Display title and description
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
                         Colors.black,
-                      ]),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListTile(
-                  title: Text(item.title,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      item.title ?? "No Title Available",
                       overflow: TextOverflow.ellipsis,
                       maxLines: screenWidth > 900 ? 2 : 1,
-                      style: const TextStyle(color: Colors.white)),
-                  subtitle: Text(
-                      parseHtmlToPlainText(
-                          "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    subtitle: Text(
+                      description,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
-                      style: const TextStyle(color: Colors.white54)),
+                      style: const TextStyle(color: Colors.white54),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
+// Updated function
   Future<dynamic> openFeedArticle(
-      BuildContext context, item, FeedType type, String imageUrl) {
+    BuildContext context,
+    dynamic item,
+    FeedType type,
+    String imageUrl,
+  ) {
     debugPrint("Open a ${feedTypeToString(type)} type feed...");
+
+    // Function to launch URLs in a browser
     Future<void> launchInBrowser(String url) async {
       if (await UrlLauncherPlatform.instance.canLaunch(url)) {
         await UrlLauncherPlatform.instance.launch(
@@ -210,152 +267,199 @@ class FeedContentViewer extends ConsumerWidget {
       }
     }
 
+    String parseContent(FeedType type, dynamic item) {
+      switch (type) {
+        case FeedType.rss:
+          return parseHtmlToPlainText(
+              (item.content is String ? item.content : item.content?.value) ??
+                  item.description ??
+                  "");
+        case FeedType.atom:
+          return parseHtmlToPlainText(
+              (item.content is String ? item.content : item.content?.value) ??
+                  item.summary ??
+                  "");
+        default:
+          return parseHtmlToPlainText(
+              (item.content is String ? item.content : item.content?.value) ??
+                  item.description ??
+                  "");
+      }
+    }
+
+    String parseDescription(FeedType type, dynamic item) {
+      switch (type) {
+        case FeedType.rss:
+          return parseHtmlToPlainText(item.description ?? "");
+        case FeedType.atom:
+          return parseHtmlToPlainText(item.summary ?? "");
+        default:
+          return parseHtmlToPlainText(item.description ?? "");
+      }
+    }
+
+    String? extractLink(FeedType type, dynamic item) {
+      switch (type) {
+        case FeedType.rss:
+          return item.link; // RSS feeds often have `link` as a direct property.
+        case FeedType.atom:
+          return (item.links != null && item.links.isNotEmpty)
+              ? item.links.first.href
+              : null; // Atom feeds store links in a list.
+        default:
+          return item.link; // Default case for unknown feed types.
+      }
+    }
+
     return showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog.fullscreen(
-            backgroundColor: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
+      context: context,
+      builder: (context) {
+        return Dialog.fullscreen(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Close Button and Tag
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const Spacer(),
+                        Chip(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          side: BorderSide.none,
+                          elevation: 0,
+                          backgroundColor: Colors.deepOrange,
+                          label: Text(
+                            feedTypeToString(type),
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Title, Description, and Image
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // #1 : Close Button and Tag
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(
-                                Icons.close,
+                        SizedBox(
+                          width: 480,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (imageUrl.isNotEmpty)
+                                FittedBox(
+                                  child: Container(
+                                    height: 270,
+                                    width: 480,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: NetworkImage(imageUrl),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(height: 10),
+                              SelectableText(
+                                item.title ?? "No Title Available",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              SelectableText(
+                                parseDescription(type, item),
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 24,
+                                ),
+                                maxLines: 5,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+
+                        // Content Section
+                        Expanded(
+                          child: SizedBox(
+                            child: SelectableText(
+                              parseContent(type, item),
+                              style: const TextStyle(
                                 color: Colors.white,
                               ),
                             ),
-                            const Spacer(),
-                            Chip(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              side: BorderSide.none,
-                              elevation: 0,
-                              backgroundColor: Colors.deepOrange,
-                              label: const Text(
-                                "Article",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 10),
-                        // #2 : Title, Description and Image
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 480,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  FittedBox(
-                                    child: Container(
-                                      height: 270,
-                                      width: 480,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: NetworkImage(imageUrl),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SelectableText(
-                                    item.title,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SelectableText(
-                                    parseHtmlToPlainText(
-                                        "${selectedFeed!.type == FeedType.rss ? item.description : ""}"),
-                                    style: const TextStyle(
-                                      color: Colors.white54,
-                                      fontSize: 24,
-                                    ),
-                                    maxLines: 5,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            // #3 : Content
-                            StatefulBuilder(builder: (context, setState) {
-                              return Expanded(
-                                child: SizedBox(
-                                  child: SelectableText(
-                                    parseHtmlToPlainText(
-                                        "${selectedFeed!.type == FeedType.rss ? item.content.value ?? "" : item.content}"),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                        // #4 : Read More Button
-                        Row(
-                          children: [
-                            const Spacer(),
-                            ElevatedButton(
-                              onPressed: () {
-                                launchInBrowser(item.link);
-                              },
-                              style: ButtonStyle(
-                                shape: WidgetStateProperty.all(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
-                                backgroundColor: WidgetStateProperty.all(
-                                  Colors.deepOrange,
-                                ),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Read More",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Icon(Icons.arrow_outward,
-                                      color: Colors.white, size: 16),
-                                ],
-                              ),
-                            ),
-                          ],
-                        )
                       ],
                     ),
-                  ),
+
+                    // Read More Button
+                    if (extractLink(type, item) != null)
+                      Row(
+                        children: [
+                          const Spacer(),
+                          ElevatedButton(
+                            onPressed: () {
+                              final url = extractLink(type, item);
+                              if (url != null) {
+                                launchInBrowser(url);
+                              }
+                            },
+                            style: ButtonStyle(
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.deepOrange),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "Read More",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Icon(Icons.arrow_outward,
+                                    color: Colors.white, size: 16),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                  ],
                 ),
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }
