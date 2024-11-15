@@ -1,8 +1,8 @@
 A material design RSS reader built primarily for desktops using Flutter and Dart.
 
-# RSS Reader Desktop
+# Drsstiny: an RSS Reader for Windows
 
-RSS Reader Desktop is a simple and efficient desktop application for reading RSS feeds. It allows users to stay updated with their favorite websites and blogs in one place.
+Drsstiny is a simple and efficient desktop application for reading RSS feeds. It allows users to stay updated with their favorite websites and blogs in one place.
 
 ## Features
 

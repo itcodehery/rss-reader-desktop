@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/helpers/html_parser.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
@@ -8,6 +9,7 @@ import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
+import 'package:toastification/toastification.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 class FeedHome extends ConsumerStatefulWidget {
@@ -270,20 +272,26 @@ class FeedContentViewer extends ConsumerWidget {
     String parseContent(FeedType type, dynamic item) {
       switch (type) {
         case FeedType.rss:
-          return parseHtmlToPlainText(
-              (item.content is String ? item.content : item.content?.value) ??
+          return parseHtmlToPlainText((item.content is String
+                      ? item.content
+                      : item.content?.value) ??
                   item.description ??
-                  "");
+                  "")
+              .trim();
         case FeedType.atom:
-          return parseHtmlToPlainText(
-              (item.content is String ? item.content : item.content?.value) ??
+          return parseHtmlToPlainText((item.content is String
+                      ? item.content
+                      : item.content?.value) ??
                   item.summary ??
-                  "");
+                  "")
+              .trim();
         default:
-          return parseHtmlToPlainText(
-              (item.content is String ? item.content : item.content?.value) ??
+          return parseHtmlToPlainText((item.content is String
+                      ? item.content
+                      : item.content?.value) ??
                   item.description ??
-                  "");
+                  "")
+              .trim();
       }
     }
 
@@ -366,16 +374,57 @@ class FeedContentViewer extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (imageUrl.isNotEmpty)
-                                FittedBox(
-                                  child: Container(
-                                    height: 270,
-                                    width: 480,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: NetworkImage(imageUrl),
-                                        fit: BoxFit.cover,
+                                GestureDetector(
+                                  onTap: () {
+                                    launchInBrowser(extractLink(type, item)!);
+                                  },
+                                  onSecondaryTap: () {
+                                    showMenu(
+                                        context: context,
+                                        position: const RelativeRect.fromLTRB(
+                                          0,
+                                          60,
+                                          20,
+                                          0,
+                                        ),
+                                        color: Colors.black,
+                                        items: [
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              title:
+                                                  const Text("Open in Browser"),
+                                              onTap: () {
+                                                launchInBrowser(
+                                                    extractLink(type, item)!);
+                                              },
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              title: const Text("Copy Link"),
+                                              onTap: () {
+                                                Clipboard.setData(ClipboardData(
+                                                    text: extractLink(
+                                                        type, item)!));
+                                                showToast(
+                                                    "Link copied to clipboard!",
+                                                    ToastificationType.info);
+                                              },
+                                            ),
+                                          ),
+                                        ]);
+                                  },
+                                  child: FittedBox(
+                                    child: Container(
+                                      height: 270,
+                                      width: 480,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: NetworkImage(imageUrl),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
                                 ),
@@ -384,7 +433,7 @@ class FeedContentViewer extends ConsumerWidget {
                                 item.title ?? "No Title Available",
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 32,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -393,7 +442,7 @@ class FeedContentViewer extends ConsumerWidget {
                                 parseDescription(type, item),
                                 style: const TextStyle(
                                   color: Colors.white54,
-                                  fontSize: 24,
+                                  fontSize: 20,
                                 ),
                                 maxLines: 5,
                               ),

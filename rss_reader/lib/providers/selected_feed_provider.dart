@@ -5,7 +5,7 @@ import 'package:rss_reader/providers/saved_feeds_provider.dart';
 class SelectedFeedNotifier extends Notifier<RawFeed?> {
   @override
   RawFeed? build() {
-    return null;
+    return ref.read(savedFeedsProvider).firstOrNull;
   }
 
   void selectFeed(int index) {

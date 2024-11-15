@@ -24,19 +24,9 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    // ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
-    // wrong place to call this function
-  }
-
-  @override
   Widget build(BuildContext context) {
     final feeds = ref.watch(savedFeedsProvider);
-    // listen to the saved feeds provider
-
     const buttonStyle = ButtonStyle(
-      // width max
       minimumSize: WidgetStatePropertyAll(Size.fromHeight(50)),
       backgroundColor: WidgetStatePropertyAll(Colors.white10),
     );

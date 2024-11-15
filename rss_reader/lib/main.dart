@@ -54,13 +54,21 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Scaffold(
-      body: Row(
-        children: [
-          FeedDrawer(),
-          FeedHome(),
-        ],
-      ),
+    final screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      body: screenWidth > 600
+          ? const Row(
+              children: [
+                FeedDrawer(),
+                FeedHome(),
+              ],
+            )
+          : const Column(
+              children: [
+                FeedDrawer(),
+                FeedHome(),
+              ],
+            ),
     );
   }
 }

@@ -10,7 +10,7 @@ class DatabaseHelper {
     var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
       debugPrint("Creating database");
       return db.execute(
-        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT)',
+        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT, icon TEXT)',
       );
     }, version: 1);
 
@@ -56,7 +56,7 @@ class DatabaseHelper {
     var db = await openDatabase('saved_feeds.db', onCreate: (db, version) {
       debugPrint("Creating database");
       return db.execute(
-        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT)',
+        'CREATE TABLE saved_feeds(id INTEGER PRIMARY KEY, title TEXT, link TEXT, type TEXT, icon TEXT)',
       );
     }, version: 1);
 

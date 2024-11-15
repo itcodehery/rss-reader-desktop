@@ -88,13 +88,17 @@ class TextBoxRSS extends ConsumerWidget {
           onPressed: () async {
             if (formKey.currentState!.validate()) {
               RawFeed? feed;
-              await getFeedType(urlController.text).then((type) {
-                feed = RawFeed(
-                  title: titleController.text,
-                  link: urlController.text,
-                  type: type,
-                );
-              });
+              await fetchImageFromFeed(urlController.text).then(
+                (value) async {
+                  await getFeedType(urlController.text).then((type) {
+                    feed = RawFeed(
+                      title: titleController.text,
+                      link: urlController.text,
+                      type: type,
+                    );
+                  });
+                },
+              );
 
               if (feed != null) {
                 savedFeeds.addFeed(feed!);

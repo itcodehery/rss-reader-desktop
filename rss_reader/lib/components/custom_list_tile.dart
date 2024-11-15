@@ -18,6 +18,7 @@ class CustomListTile extends ConsumerWidget {
       "View Feed Info": () {
         // show feed info
         final feed = ref.read(savedFeedsProvider)[index];
+
         showDialog(
             context: context,
             builder: (context) {
@@ -95,6 +96,7 @@ class CustomListTile extends ConsumerWidget {
     };
 
     final selectedFeed = ref.watch(selectedFeedProvider);
+    debugPrint('Selected feed: $selectedFeed');
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       // right click to delete feed
@@ -134,22 +136,19 @@ class CustomListTile extends ConsumerWidget {
           );
         },
         child: Card(
-          color: selectedFeed != null && selectedFeed.title == title
+          color: selectedFeed!.title == title
               ? Colors.deepOrange.withOpacity(0.2)
               : Colors.grey.shade900,
           child: ListTile(
             contentPadding: const EdgeInsets.only(left: 16, right: 16),
             leading: const CircleAvatar(
-              radius: 10,
-              backgroundColor: Colors.deepOrange,
-              child: FittedBox(
+                radius: 10,
+                backgroundColor: Colors.deepOrange,
                 child: Icon(
                   Icons.rss_feed,
                   size: 12,
                   color: Colors.white,
-                ),
-              ),
-            ),
+                )),
             title: Text(
               title,
               style: const TextStyle(
@@ -159,7 +158,7 @@ class CustomListTile extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: selectedFeed != null && selectedFeed.title == title
+            trailing: selectedFeed.title == title
                 ? IconButton(
                     icon: const Icon(
                       Icons.delete_outline,

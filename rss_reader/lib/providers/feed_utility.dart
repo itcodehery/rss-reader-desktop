@@ -19,6 +19,28 @@ String feedTypeToString(FeedType feedType) {
   }
 }
 
+Future<String> getFeedIcon(String url) async {
+  // get a favicon from the website
+  try {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final document = XmlDocument.parse(response.body);
+      final iconLink = document.findAllElements('link').firstWhere(
+            (element) => element.getAttribute('rel') == 'icon',
+          );
+
+      return iconLink.getAttribute('href') ?? '';
+    } else {
+      throw Exception('Failed to load page');
+    }
+  } catch (e) {
+    showToast(
+        "Error fetching icon! Please check the url!", ToastificationType.error);
+    throw Exception('Error fetching icon: $e');
+  }
+}
+
 Future<FeedType> getFeedType(String url) async {
   try {
     final response = await http.get(Uri.parse(url));
