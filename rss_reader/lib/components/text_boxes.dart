@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
+import 'package:rss_reader/providers/customization_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
+import 'package:rss_reader/providers/theme_provider.dart';
 import 'package:toastification/toastification.dart';
 
 class TextBoxRSS extends ConsumerWidget {
@@ -15,11 +17,18 @@ class TextBoxRSS extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     TextEditingController titleController = TextEditingController();
     TextEditingController urlController = TextEditingController();
+    // to get saved feeds
     final savedFeeds = ref.watch(savedFeedsProvider.notifier);
+    // to get theme
+    final theme = ref.watch(themeProvider);
+    // to get accent color
+    final accentColor = ref.watch(accentColorProvider);
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     return AlertDialog(
-      backgroundColor: Colors.grey.shade900,
+      backgroundColor: theme.brightness == Brightness.light
+          ? accentColor.shade100
+          : Colors.grey.shade900,
       titlePadding: const EdgeInsets.all(0),
       contentPadding: const EdgeInsets.all(2),
       content: Form(
@@ -29,8 +38,8 @@ class TextBoxRSS extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,18 +47,26 @@ class TextBoxRSS extends ConsumerWidget {
                   Text(
                     "Add RSS Feed",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: theme.brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text("Enter the title and the RSS feed URL",
-                      style: TextStyle(color: Colors.white54)),
+                      style: TextStyle(
+                          color: theme.brightness == Brightness.light
+                              ? Colors.black
+                              : Colors.white)),
                 ],
               ),
             ),
             TextFormField(
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                  color: theme.brightness == Brightness.light
+                      ? Colors.black
+                      : Colors.white),
               decoration: const InputDecoration(
                 hintText: "Enter Title",
                 border: OutlineInputBorder(borderSide: BorderSide.none),
@@ -81,10 +98,13 @@ class TextBoxRSS extends ConsumerWidget {
       ),
       actions: [
         ElevatedButton(
-          style: const ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(Colors.transparent),
-              foregroundColor: WidgetStatePropertyAll(Colors.white),
-              elevation: WidgetStatePropertyAll(0)),
+          style: ButtonStyle(
+              backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+              foregroundColor: WidgetStatePropertyAll(
+                  theme.brightness == Brightness.light
+                      ? Colors.black
+                      : Colors.white),
+              elevation: const WidgetStatePropertyAll(0)),
           onPressed: () async {
             if (formKey.currentState!.validate()) {
               RawFeed? feed;

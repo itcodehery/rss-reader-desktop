@@ -3,6 +3,7 @@ import 'package:rss_reader/components/custom_list_tile.dart';
 import 'package:rss_reader/components/text_boxes.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/providers/customization_provider.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 import 'package:rss_reader/providers/theme_provider.dart';
@@ -25,19 +26,33 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    // to get the saved feeds
     final feeds = ref.watch(savedFeedsProvider);
-    const buttonStyle = ButtonStyle(
-      minimumSize: WidgetStatePropertyAll(Size.fromHeight(50)),
-      backgroundColor: WidgetStatePropertyAll(Colors.white10),
+    // to get the accent color
+    final accentColor = ref.watch(accentColorProvider);
+    // to get the theme
+    final theme = ref.watch(themeProvider);
+
+    // button Style
+    var buttonStyle = ButtonStyle(
+      minimumSize: const WidgetStatePropertyAll(Size.fromHeight(50)),
+      backgroundColor: WidgetStatePropertyAll(
+        theme.brightness == Brightness.light
+            ? accentColor.shade100
+            : Colors.white10,
+      ),
     );
     return Container(
       height: double.infinity,
       width: getWidth(context),
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(12),
-      decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          color: Colors.white10),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        color: theme.brightness == Brightness.light
+            ? accentColor.withOpacity(0.1)
+            : Colors.black12,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,9 +62,9 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.brightness_4_outlined),
+                  icon: const Icon(Icons.settings_outlined),
                   onPressed: () {
-                    ref.read(themeProvider.notifier).toggleTheme();
+                    Navigator.pushNamed(context, '/prefs');
                   },
                 ),
                 IconButton(
@@ -65,15 +80,19 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
             ),
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(
+            leading: Icon(
               Icons.rss_feed_outlined,
               size: 14,
-              color: Colors.white,
+              color: theme.brightness == Brightness.light
+                  ? accentColor
+                  : Colors.white,
             ),
-            title: const Text(
+            title: Text(
               'Drsstiny',
               style: TextStyle(
-                color: Colors.white,
+                color: theme.brightness == Brightness.light
+                    ? accentColor
+                    : Colors.white,
               ),
             ),
             subtitle: const Text("Your Feeds"),
@@ -88,21 +107,28 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
               FocusScope.of(context).unfocus();
               Navigator.pushNamed(context, '/search');
             },
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.all(0),
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.all(0),
               filled: true,
               hintText: "Search",
-              hintStyle: TextStyle(color: Colors.white54),
+              hintStyle: TextStyle(
+                  color: theme.brightness == Brightness.light
+                      ? Colors.black54
+                      : Colors.white54),
               prefixIcon: Icon(
                 Icons.search,
                 size: 16,
-                color: Colors.white54,
+                color: theme.brightness == Brightness.light
+                    ? Colors.black54
+                    : Colors.white54,
               ),
-              border: OutlineInputBorder(
+              border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
                 borderSide: BorderSide.none,
               ),
-              fillColor: Colors.white10,
+              fillColor: theme.brightness == Brightness.light
+                  ? Colors.black12
+                  : Colors.white12,
             ),
           ),
           const SizedBox(height: 12),
@@ -138,10 +164,10 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                   },
                 );
               },
-              child: const Text(
+              child: Text(
                 "Add RSS Feed",
-                style: TextStyle(
-                    color: Colors.deepOrange, fontWeight: FontWeight.w500),
+                style:
+                    TextStyle(color: accentColor, fontWeight: FontWeight.w500),
               )),
         ],
       ),

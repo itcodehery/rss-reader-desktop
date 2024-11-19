@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/helpers/html_parser.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:rss_reader/models/raw_feed.dart';
+import 'package:rss_reader/providers/customization_provider.dart';
 import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
+import 'package:rss_reader/providers/theme_provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
@@ -22,9 +24,14 @@ class FeedHome extends ConsumerStatefulWidget {
 class _FeedHomeState extends ConsumerState<FeedHome> {
   @override
   Widget build(BuildContext context) {
+    // to get the selected feed
     final selectedFeed = ref.watch(selectedFeedProvider);
+    // to get the theme
+    final theme = ref.watch(themeProvider);
+
+    // building the UI
     return selectedFeed == null || selectedFeed.link.isEmpty
-        ? const Expanded(
+        ? Expanded(
             child: Center(
               child: FittedBox(
                 child: Column(
@@ -34,13 +41,17 @@ class _FeedHomeState extends ConsumerState<FeedHome> {
                       'Welcome to Drsstiny',
                       style: TextStyle(
                         fontSize: 22,
-                        color: Colors.white54,
+                        color: theme.brightness == Brightness.light
+                            ? Colors.black
+                            : Colors.white70,
                       ),
                     ),
                     Text('Select a feed to view its content',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.white54,
+                          color: theme.brightness == Brightness.light
+                              ? Colors.black54
+                              : Colors.white54,
                         )),
                   ],
                 ),
@@ -61,9 +72,16 @@ class FeedContentViewer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // gets the current feed
     final currentFeed = ref.watch(fetchFeedContentsProvider);
+    // gets the screen width
     final screenWidth = MediaQuery.of(context).size.width;
+    // gets the theme
+    final theme = ref.watch(themeProvider);
+    // gets the accent color
+    final accentColor = ref.watch(accentColorProvider);
 
+    // building the UI
     return switch (currentFeed) {
       AsyncData(:final value) => Expanded(
           child: Padding(
@@ -81,7 +99,8 @@ class FeedContentViewer extends ConsumerWidget {
                 final item = value[index];
                 String imageUrl = '';
 
-                return feedContentBox(item, imageUrl, screenWidth);
+                return feedContentBox(
+                    item, imageUrl, screenWidth, theme, accentColor);
               },
             ),
           ),
@@ -91,25 +110,25 @@ class FeedContentViewer extends ConsumerWidget {
             child: Text(
               'Error fetching feed: $error',
               style: const TextStyle(
-                color: Colors.white54,
+                color: Colors.red,
               ),
             ),
           ),
         ),
-      _ => const Expanded(
+      _ => Expanded(
           child: Center(
             child: CircularProgressIndicator(
               strokeCap: StrokeCap.round,
               strokeWidth: 10,
-              color: Colors.deepOrange,
+              color: accentColor,
             ),
           ),
         ),
     };
   }
 
-  StatefulBuilder feedContentBox(
-      dynamic item, String imageUrl, double screenWidth) {
+  StatefulBuilder feedContentBox(dynamic item, String imageUrl,
+      double screenWidth, ThemeData theme, MaterialColor accentColor) {
     return StatefulBuilder(
       builder: (context, setState) {
         // Fetch the image if not already available
@@ -153,11 +172,12 @@ class FeedContentViewer extends ConsumerWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white10,
+            color: theme.brightness == Brightness.light
+                ? Colors.white12
+                : Colors.black12,
             image: imageUrl.isNotEmpty
                 ? DecorationImage(
                     image: NetworkImage(imageUrl),
-                    opacity: 0.5,
                     fit: BoxFit.cover,
                   )
                 : null,
@@ -194,7 +214,7 @@ class FeedContentViewer extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(5),
                           ),
                           side: BorderSide.none,
-                          backgroundColor: Colors.deepOrange,
+                          backgroundColor: accentColor,
                           label: Text(
                             toSentenceCase(category),
                             overflow: TextOverflow.ellipsis,

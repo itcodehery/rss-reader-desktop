@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
+import 'package:rss_reader/providers/customization_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
+import 'package:rss_reader/providers/theme_provider.dart';
 import 'package:toastification/toastification.dart';
 
 class CustomListTile extends ConsumerWidget {
@@ -14,89 +16,12 @@ class CustomListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Map<String, Function> feedOptions = {
-      "View Feed Info": () {
-        // show feed info
-        final feed = ref.read(savedFeedsProvider)[index];
-
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Feed Info'),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0)),
-                backgroundColor: Colors.grey.shade900,
-                titleTextStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-                contentTextStyle: const TextStyle(color: Colors.white),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Title: ${feed.title}'),
-                    Text('Link: ${feed.link}'),
-                    Text('Type: ${feedTypeToString(feed.type)}'),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Close'),
-                  ),
-                ],
-              );
-            });
-      },
-      "Delete Feed": () {
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                backgroundColor: Colors.grey.shade900,
-                title: const Text('Delete Feed',
-                    style: TextStyle(color: Colors.white)),
-                content: const Text(
-                    'Are you sure you want to delete this feed?',
-                    style: TextStyle(color: Colors.white)),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      ref.read(selectedFeedProvider.notifier).deselectFeed();
-                      ref.read(savedFeedsProvider.notifier).removeFeed(index);
-
-                      showToast("Removing $title feed...",
-                          ToastificationType.warning);
-                      Navigator.of(context).pop();
-                      ref.invalidate(selectedFeedProvider);
-                      Future.delayed(const Duration(seconds: 1), () {
-                        ref.read(savedFeedsProvider.notifier).fetchAllFeeds();
-                      });
-                    },
-                    child: const Text('Yes',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child:
-                        const Text('No', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              );
-            });
-      },
-      "Share Feed": () {},
-    };
-
+    // for the selected Feed
     final selectedFeed = ref.watch(selectedFeedProvider);
-    debugPrint('Selected feed: $selectedFeed');
+    // for the theme
+    final theme = ref.watch(themeProvider);
+    // for the accent color
+    final accentColor = ref.watch(accentColorProvider);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       // right click to delete feed
@@ -122,7 +47,93 @@ class CustomListTile extends ConsumerWidget {
               curve: Curves.easeInCubic,
               duration: const Duration(milliseconds: 500),
             ),
-            items: feedOptions.entries
+            items: {
+              "View Feed Info": () {
+                // show feed info
+                final feed = ref.read(savedFeedsProvider)[index];
+
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Feed Info'),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0)),
+                        backgroundColor: Colors.grey.shade900,
+                        titleTextStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                        contentTextStyle: const TextStyle(color: Colors.white),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Title: ${feed.title}'),
+                            Text('Link: ${feed.link}'),
+                            Text('Type: ${feedTypeToString(feed.type)}'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      );
+                    });
+              },
+              "Delete Feed": () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        backgroundColor: Colors.grey.shade900,
+                        title: const Text('Delete Feed',
+                            style: TextStyle(color: Colors.white)),
+                        content: const Text(
+                            'Are you sure you want to delete this feed?',
+                            style: TextStyle(color: Colors.white)),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              ref
+                                  .read(selectedFeedProvider.notifier)
+                                  .deselectFeed();
+                              ref
+                                  .read(savedFeedsProvider.notifier)
+                                  .removeFeed(index);
+
+                              showToast("Removing $title feed...",
+                                  ToastificationType.warning);
+                              Navigator.of(context).pop();
+                              ref.invalidate(selectedFeedProvider);
+                              Future.delayed(const Duration(seconds: 1), () {
+                                ref
+                                    .read(savedFeedsProvider.notifier)
+                                    .fetchAllFeeds();
+                              });
+                            },
+                            child: const Text('Yes',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('No',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      );
+                    });
+              },
+              "Share Feed": () {},
+            }
+                .entries
                 .map((MapEntry<String, Function> entry) => PopupMenuItem(
                       value: entry.key,
                       mouseCursor: SystemMouseCursors.click,
@@ -137,33 +148,39 @@ class CustomListTile extends ConsumerWidget {
         },
         child: Card(
           color: selectedFeed!.title == title
-              ? Colors.deepOrange.withOpacity(0.2)
+              ? (theme.brightness == Brightness.light
+                  ? accentColor.shade200
+                  : accentColor.withOpacity(0.2))
               : Colors.grey.shade900,
           child: ListTile(
             contentPadding: const EdgeInsets.only(left: 16, right: 16),
-            leading: const CircleAvatar(
+            leading: CircleAvatar(
                 radius: 10,
-                backgroundColor: Colors.deepOrange,
-                child: Icon(
+                backgroundColor: accentColor,
+                child: const Icon(
                   Icons.rss_feed,
                   size: 12,
                   color: Colors.white,
                 )),
             title: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.white,
+                color: theme.brightness == Brightness.light
+                    ? Colors.black87
+                    : Colors.white,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             trailing: selectedFeed.title == title
                 ? IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete_outline,
                       size: 16,
-                      color: Colors.white30,
+                      color: theme.brightness == Brightness.light
+                          ? Colors.black87
+                          : Colors.white30,
                     ),
                     onPressed: () {
                       showDialog(
