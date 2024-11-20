@@ -131,7 +131,10 @@ class CustomListTile extends ConsumerWidget {
                       );
                     });
               },
-              "Share Feed": () {},
+              "Share Feed": () {
+                final feed = ref.read(savedFeedsProvider)[index];
+                copyToClipboardAndShowToast(feed.link);
+              },
             }
                 .entries
                 .map((MapEntry<String, Function> entry) => PopupMenuItem(
@@ -151,7 +154,10 @@ class CustomListTile extends ConsumerWidget {
               ? (theme.brightness == Brightness.light
                   ? accentColor.shade200
                   : accentColor.withOpacity(0.2))
-              : Colors.grey.shade900,
+              : (theme.brightness == Brightness.light
+                  ? accentColor.withOpacity(0.1)
+                  : Colors.black12),
+          elevation: 0,
           child: ListTile(
             contentPadding: const EdgeInsets.only(left: 16, right: 16),
             leading: CircleAvatar(
@@ -233,15 +239,12 @@ class CustomListTile extends ConsumerWidget {
                           });
                     },
                   )
-                : IconButton(
-                    onPressed: () {
-                      ref.read(selectedFeedProvider.notifier).selectFeed(index);
-                    },
-                    icon: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: Colors.white30,
-                    ),
+                : Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: theme.brightness == Brightness.light
+                        ? Colors.black87
+                        : Colors.white30,
                   ),
             onTap: () {
               ref.read(selectedFeedProvider.notifier).selectFeed(index);

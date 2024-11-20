@@ -11,7 +11,6 @@ import 'package:rss_reader/providers/feed_content_provider.dart';
 import 'package:rss_reader/providers/feed_utility.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 import 'package:rss_reader/providers/theme_provider.dart';
-import 'package:toastification/toastification.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 class FeedHome extends ConsumerStatefulWidget {
@@ -195,7 +194,8 @@ class FeedContentViewer extends ConsumerWidget {
                       : null;
 
               if (link != null) {
-                openFeedArticle(context, item, selectedFeed!.type, imageUrl);
+                openFeedArticle(context, item, selectedFeed!.type, imageUrl,
+                    accentColor, theme);
               } else {
                 debugPrint("No link available for this feed item.");
               }
@@ -269,6 +269,8 @@ class FeedContentViewer extends ConsumerWidget {
     dynamic item,
     FeedType type,
     String imageUrl,
+    MaterialColor accentColor,
+    ThemeData theme,
   ) {
     debugPrint("Open a ${feedTypeToString(type)} type feed...");
 
@@ -347,7 +349,9 @@ class FeedContentViewer extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: theme.brightness == Brightness.light
+                  ? ImageFilter.blur(sigmaX: 5, sigmaY: 5)
+                  : ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +375,7 @@ class FeedContentViewer extends ConsumerWidget {
                           ),
                           side: BorderSide.none,
                           elevation: 0,
-                          backgroundColor: Colors.deepOrange,
+                          backgroundColor: accentColor,
                           label: Text(
                             feedTypeToString(type),
                             style: const TextStyle(
@@ -407,12 +411,20 @@ class FeedContentViewer extends ConsumerWidget {
                                           20,
                                           0,
                                         ),
-                                        color: Colors.black,
+                                        color:
+                                            theme.brightness == Brightness.light
+                                                ? Colors.white
+                                                : Colors.black,
                                         items: [
                                           PopupMenuItem(
                                             child: ListTile(
-                                              title:
-                                                  const Text("Open in Browser"),
+                                              title: Text("Open in Browser",
+                                                  style: TextStyle(
+                                                    color: theme.brightness ==
+                                                            Brightness.light
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                  )),
                                               onTap: () {
                                                 launchInBrowser(
                                                     extractLink(type, item)!);
@@ -421,14 +433,16 @@ class FeedContentViewer extends ConsumerWidget {
                                           ),
                                           PopupMenuItem(
                                             child: ListTile(
-                                              title: const Text("Copy Link"),
+                                              title: Text("Copy Link",
+                                                  style: TextStyle(
+                                                    color: theme.brightness ==
+                                                            Brightness.light
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                  )),
                                               onTap: () {
-                                                Clipboard.setData(ClipboardData(
-                                                    text: extractLink(
-                                                        type, item)!));
-                                                showToast(
-                                                    "Link copied to clipboard!",
-                                                    ToastificationType.info);
+                                                copyToClipboardAndShowToast(
+                                                    extractLink(type, item)!);
                                               },
                                             ),
                                           ),
@@ -504,7 +518,7 @@ class FeedContentViewer extends ConsumerWidget {
                                 ),
                               ),
                               backgroundColor:
-                                  WidgetStateProperty.all(Colors.deepOrange),
+                                  WidgetStateProperty.all(accentColor),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,

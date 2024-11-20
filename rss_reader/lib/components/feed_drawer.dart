@@ -36,12 +36,20 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
     // button Style
     var buttonStyle = ButtonStyle(
       minimumSize: const WidgetStatePropertyAll(Size.fromHeight(50)),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      elevation: const WidgetStatePropertyAll(0),
       backgroundColor: WidgetStatePropertyAll(
         theme.brightness == Brightness.light
             ? accentColor.shade100
-            : Colors.white10,
+            : accentColor.withOpacity(0.2),
       ),
     );
+
+    // return the drawer
     return Container(
       height: double.infinity,
       width: getWidth(context),
@@ -49,9 +57,10 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(12)),
+        border: Border.all(width: 1.5, color: accentColor.withOpacity(0.2)),
         color: theme.brightness == Brightness.light
             ? accentColor.withOpacity(0.1)
-            : Colors.black12,
+            : Colors.grey.shade900.withOpacity(0.5),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

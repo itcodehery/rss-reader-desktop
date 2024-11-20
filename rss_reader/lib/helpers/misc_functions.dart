@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:toastification/toastification.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
@@ -41,4 +42,9 @@ Future<String> fetchImageFromFeed(String rssUrl) async {
     debugPrint('Error fetching image: $e');
     return '';
   }
+}
+
+void copyToClipboardAndShowToast(String text) {
+  Clipboard.setData(ClipboardData(text: text));
+  showToast("Link copied to clipboard!", ToastificationType.info);
 }
