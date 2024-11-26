@@ -7,9 +7,15 @@ Drsstiny is a simple and efficient desktop application for reading RSS feeds. It
 ## Features
 
 - **Easy Subscription**: Subscribe to your favorite RSS feeds with ease.
-- **Customizable Interface**: Personalize the look and feel of the reader.
-- **Offline Reading**: Access your feeds even when you are offline.
-- **Notifications**: Get notified about new articles and updates.
+- **Customizable Interface**: Personalize the theme and accent color of the reader.
+- **All your Feeds at One Place**: Read all your feeds in a clean and organized interface.
+
+## Screenshots
+
+![Screenshot 1]("ss/Home.png")
+![Screenshot 2]("ss/AddFeed.png")
+![Screenshot 3]("ss/ArticleInfo.png")
+![Screenshot 4]("ss/Themed.png")
 
 ## Installation
 
