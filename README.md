@@ -12,10 +12,10 @@ Drsstiny is a simple and efficient desktop application for reading RSS feeds. It
 
 ## Screenshots
 
-![Screenshot 1]("ss/Home.png")
-![Screenshot 2]("ss/AddFeed.png")
-![Screenshot 3]("ss/ArticleInfo.png")
-![Screenshot 4]("ss/Themed.png")
+![Screenshot 1](ss/Home.png)
+![Screenshot 2](ss/AddFeed.png)
+![Screenshot 3](ss/ArticleInfo.png)
+![Screenshot 4](ss/Themed.png)
 
 ## Installation
 
