@@ -3,6 +3,7 @@ import 'package:rss_reader/components/custom_list_tile.dart';
 import 'package:rss_reader/components/text_boxes.dart';
 import 'package:rss_reader/helpers/misc_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rss_reader/models/raw_feed.dart';
 import 'package:rss_reader/providers/customization_provider.dart';
 import 'package:rss_reader/providers/saved_feeds_provider.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
@@ -71,7 +72,10 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.settings_outlined),
+                  icon: const Icon(
+                    Icons.settings_outlined,
+                    size: 16,
+                  ),
                   onPressed: () {
                     Navigator.pushNamed(context, '/prefs');
                   },
@@ -84,27 +88,30 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                       });
                       showToast("Refreshing feeds...", ToastificationType.info);
                     },
-                    icon: const Icon(Icons.refresh)),
+                    icon: const Icon(
+                      Icons.refresh,
+                      size: 16,
+                    )),
+                IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/bookmarks');
+                    },
+                    icon: const Icon(Icons.bookmark_border, size: 16)),
               ],
             ),
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(
-              Icons.rss_feed_outlined,
-              size: 14,
-              color: theme.brightness == Brightness.light
-                  ? accentColor
-                  : Colors.white,
-            ),
-            title: Text(
-              'Drsstiny',
-              style: TextStyle(
-                color: theme.brightness == Brightness.light
-                    ? accentColor
-                    : Colors.white,
+            title: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                'Your Feeds',
+                style: TextStyle(
+                  color: theme.brightness == Brightness.light
+                      ? accentColor
+                      : accentColor.shade200,
+                ),
               ),
             ),
-            subtitle: const Text("Your Feeds"),
           ),
           const SizedBox(height: 12),
           // FOCUS : search bar
@@ -142,24 +149,16 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
           ),
           const SizedBox(height: 12),
           if (feeds.isNotEmpty) ...[
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: feeds.length,
-                itemBuilder: (context, index) {
-                  return CustomListTile(
-                    title: feeds[index].title,
-                    index: index,
-                  );
-                },
-              ),
-            ),
+            RSSListView(feeds: feeds),
           ] else
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Text(
                   "No feeds added",
-                  style: TextStyle(color: Colors.white54),
+                  style: TextStyle(
+                      color: theme.brightness == Brightness.light
+                          ? accentColor
+                          : accentColor.shade400),
                 ),
               ),
             ),
@@ -179,6 +178,31 @@ class _FeedDrawerState extends ConsumerState<FeedDrawer> {
                     TextStyle(color: accentColor, fontWeight: FontWeight.w500),
               )),
         ],
+      ),
+    );
+  }
+}
+
+class RSSListView extends StatelessWidget {
+  const RSSListView({
+    super.key,
+    required this.feeds,
+  });
+
+  final List<RawFeed> feeds;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: feeds.length,
+        itemBuilder: (context, index) {
+          return CustomListTile(
+            title: feeds[index].title,
+            index: index,
+          );
+        },
       ),
     );
   }

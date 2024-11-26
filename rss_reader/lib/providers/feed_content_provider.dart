@@ -6,6 +6,7 @@ import 'package:rss_dart/dart_rss.dart';
 import 'package:rss_reader/providers/selected_feed_provider.dart';
 import 'package:xml/xml.dart';
 import 'package:rss_dart/domain/rss1_feed.dart';
+import 'package:king_cache/king_cache.dart';
 
 part 'feed_content_provider.g.dart';
 
@@ -14,7 +15,7 @@ Future<List<dynamic>> fetchFeedContents(Ref ref) async {
   final url = ref.watch(selectedFeedProvider);
   try {
     final response = await http.get(Uri.parse(url!.link));
-
+    // final response = KingCache()
     if (response.statusCode == 200) {
       final document = XmlDocument.parse(response.body);
 

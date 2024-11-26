@@ -32,7 +32,6 @@ class ThemeHelper {
         Colors.orange,
         Colors.blue,
         Colors.green,
-        Colors.lime,
         Colors.purple,
         Colors.red,
         Colors.pink,

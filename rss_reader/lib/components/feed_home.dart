@@ -27,6 +27,8 @@ class _FeedHomeState extends ConsumerState<FeedHome> {
     final selectedFeed = ref.watch(selectedFeedProvider);
     // to get the theme
     final theme = ref.watch(themeProvider);
+    // to get the accent color
+    final accentColor = ref.watch(accentColorProvider);
 
     // building the UI
     return selectedFeed == null || selectedFeed.link.isEmpty
@@ -41,11 +43,11 @@ class _FeedHomeState extends ConsumerState<FeedHome> {
                       style: TextStyle(
                         fontSize: 22,
                         color: theme.brightness == Brightness.light
-                            ? Colors.black
-                            : Colors.white70,
+                            ? accentColor
+                            : accentColor.shade200,
                       ),
                     ),
-                    Text('Select a feed to view its content',
+                    Text('Select / Add a feed to view its content',
                         style: TextStyle(
                           fontSize: 14,
                           color: theme.brightness == Brightness.light
@@ -172,8 +174,8 @@ class FeedContentViewer extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: theme.brightness == Brightness.light
-                ? Colors.white12
-                : Colors.black12,
+                ? accentColor.withOpacity(0.1)
+                : accentColor.withOpacity(0.2),
             image: imageUrl.isNotEmpty
                 ? DecorationImage(
                     image: NetworkImage(imageUrl),

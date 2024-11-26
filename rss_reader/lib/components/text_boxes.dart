@@ -23,6 +23,7 @@ class TextBoxRSS extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     // to get accent color
     final accentColor = ref.watch(accentColorProvider);
+    // to get the form key
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     return AlertDialog(

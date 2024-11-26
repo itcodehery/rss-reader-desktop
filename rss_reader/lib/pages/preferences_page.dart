@@ -9,6 +9,11 @@ class PreferencesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // get the accentColor
+    final accentColor = ref.watch(accentColorProvider);
+    // get the theme
+    final theme = ref.watch(themeProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preferences'),
@@ -17,6 +22,15 @@ class PreferencesPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
+            ListTile(
+              title: Text(
+                "Customization",
+                style: TextStyle(
+                  color: accentColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             ListTile(
               title: const Text("Light Mode"),
               trailing: Switch(
@@ -51,7 +65,9 @@ class PreferencesPage extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
                                 color: ref.watch(accentColorProvider) == e
-                                    ? Colors.white
+                                    ? (theme.brightness == Brightness.light
+                                        ? Colors.black54
+                                        : Colors.white)
                                     : Colors.transparent,
                                 width: 2),
                             color: e),
@@ -59,7 +75,9 @@ class PreferencesPage extends ConsumerWidget {
                       Icon(
                         Icons.check,
                         color: ref.watch(accentColorProvider) == e
-                            ? Colors.white
+                            ? (theme.brightness == Brightness.light
+                                ? Colors.black54
+                                : Colors.white)
                             : Colors.transparent,
                       )
                     ],

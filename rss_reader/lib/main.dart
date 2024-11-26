@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rss_reader/components/feed_drawer.dart';
 import 'package:rss_reader/components/feed_home.dart';
+import 'package:rss_reader/pages/bookmarks_page.dart';
 import 'package:rss_reader/pages/preferences_page.dart';
 import 'package:rss_reader/pages/search_page.dart';
 import 'package:rss_reader/pages/splash_page.dart';
@@ -45,6 +46,7 @@ class MyApp extends ConsumerWidget {
           '/home': (context) => const HomePage(),
           '/search': (context) => const SearchPage(),
           '/prefs': (context) => const PreferencesPage(),
+          '/bookmarks': (context) => const BookmarksPage(),
         },
       ),
     );
